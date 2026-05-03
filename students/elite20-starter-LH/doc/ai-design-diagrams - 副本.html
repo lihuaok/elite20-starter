@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 编程助手 - AI 调用代码设计图</title>
+    <style>
+        :root {
+            --primary: #1e3a5f;
+            --primary-light: #2d5a87;
+            --accent: #00d4ff;
+            --accent-light: rgba(0, 212, 255, 0.1);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --bg-light: #f8fafc;
+            --bg-card: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 40px 24px; }
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 48px;
+            border-radius: 20px;
+            margin-bottom: 32px;
+            box-shadow: 0 10px 40px rgba(30, 58, 95, 0.3);
+        }
+        header h1 { font-size: 2.2rem; margin-bottom: 8px; }
+        header p { opacity: 0.9; font-size: 1.1rem; }
+        .section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+        .section h2 {
+            color: var(--primary);
+            font-size: 1.6rem;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 3px solid var(--accent);
+        }
+        .section p {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            font-size: 1.05rem;
+        }
+        .diagram-container {
+            background: var(--bg-light);
+            border-radius: 16px;
+            padding: 40px;
+            margin: 16px 0;
+            overflow-x: auto;
+        }
+
+        .architecture-diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+        .layer-row {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            align-items: flex-start;
+        }
+        .layer-box {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 32px;
+            width: 360px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            border-top: 4px solid var(--accent);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .layer-box:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+        }
+        .layer-box.header-layer { border-top-color: #8b5cf6; }
+        .layer-box.logic-layer { border-top-color: #3b82f6; }
+        .layer-box.service-layer { border-top-color: #10b981; }
+        .layer-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 16px;
+        }
+        .layer-box.header-layer .layer-icon { background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%); }
+        .layer-box.logic-layer .layer-icon { background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%); }
+        .layer-box.service-layer .layer-icon { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); }
+        .layer-box h4 {
+            color: var(--primary);
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .layer-box ul {
+            list-style: none;
+            padding: 0;
+        }
+        .layer-box li {
+            padding: 10px 14px;
+            background: var(--bg-light);
+            border-radius: 10px;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .layer-box li:last-child { margin-bottom: 0; }
+        .layer-box li .code-tag {
+            background: rgba(30, 58, 95, 0.1);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.8rem;
+            color: var(--primary);
+            font-weight: 500;
+        }
+        .flow-arrow {
+            width: 50px;
+            height: 50px;
+            background: var(--bg-card);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .flow-arrow.vertical { transform: rotate(0deg); }
+        .flow-arrow.horizontal { transform: rotate(-90deg); }
+        .flow-line-horizontal {
+            width: 40px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent) 0%, rgba(0,212,255,0.3) 100%);
+            align-self: center;
+        }
+        .flow-line-vertical {
+            width: 3px;
+            height: 30px;
+            background: linear-gradient(180deg, var(--accent) 0%, rgba(0,212,255,0.3) 100%);
+        }
+
+        .flow-diagram {
+            position: relative;
+            padding-left: 50px;
+        }
+        .flow-step {
+            position: relative;
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-left: 4px solid var(--accent);
+        }
+        .flow-step::before {
+            content: '';
+            position: absolute;
+            left: -28px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .flow-step:nth-child(1)::before { content: '1'; }
+        .flow-step:nth-child(2)::before { content: '2'; }
+        .flow-step:nth-child(3)::before { content: '3'; }
+        .flow-step:nth-child(4)::before { content: '4'; }
+        .flow-step:nth-child(5)::before { content: '5'; }
+        .flow-step:nth-child(6)::before { content: '6'; }
+        .flow-step:nth-child(7)::before { content: '7'; }
+        .flow-step strong { color: var(--primary); font-size: 1.05rem; }
+        .flow-step p { margin-top: 8px; color: var(--text-secondary); margin-bottom: 0; }
+        .decision-node {
+            background: #fef3c7;
+            border: 2px dashed #f59e0b;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+            text-align: center;
+            font-weight: 600;
+            color: #92400e;
+        }
+
+        .service-diagram {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+        .service-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-top: 4px solid var(--accent);
+            transition: transform 0.3s ease;
+        }
+        .service-card:hover { transform: translateY(-4px); }
+        .service-card .logo {
+            width: 50px;
+            height: 50px;
+            background: var(--accent-light);
+            border-radius: 12px;
+            margin: 0 auto 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+        }
+        .service-card h4 { margin-bottom: 8px; color: var(--primary); font-size: 1.1rem; }
+        .service-card p { font-size: 0.85rem; color: var(--text-secondary); }
+        .service-card .model-name {
+            font-size: 0.75rem;
+            margin-top: 8px;
+            padding: 4px 12px;
+            background: var(--bg-light);
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .status-diagram {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 50px;
+            flex-wrap: wrap;
+        }
+        .status-node {
+            text-align: center;
+        }
+        .status-circle {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 14px;
+            font-weight: 600;
+            color: white;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .status-idle { background: linear-gradient(135deg, #64748b 0%, #94a3b8 100%); }
+        .status-loading { 
+            background: linear-gradient(135deg, #00d4ff 0%, #60efff 100%); 
+            animation: pulse 1.5s infinite; 
+        }
+        .status-success { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); }
+        .status-error { background: linear-gradient(135deg, #ef4444 0%, #f87171 100%); }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+        .status-arrow { font-size: 1.8rem; color: #cbd5e1; }
+        .status-label { font-size: 0.95rem; color: var(--text-secondary); }
+
+        .data-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .data-box {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .data-box .icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(30, 58, 95, 0.08);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .data-box .content {
+            background: var(--bg-card);
+            padding: 16px 20px;
+            border-radius: 12px;
+            flex: 1;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .data-box .content h5 { margin-bottom: 6px; color: var(--primary); font-size: 1rem; }
+        .data-box .content p { font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 0; }
+        .flow-connector { text-align: center; font-size: 1.8rem; color: var(--accent); }
+
+        .svg-diagram {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+        }
+        .code-ref {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.85rem;
+        }
+
+        .function-rel-diagram {
+            position: relative;
+            min-height: 500px;
+        }
+        .func-node {
+            position: absolute;
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        .func-node.main {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 20px 30px;
+        }
+        .func-node.main h5 { color: white; }
+        .func-node.core {
+            border-top: 3px solid var(--success);
+        }
+        .func-node.util {
+            border-top: 3px solid var(--warning);
+        }
+        .func-node.dep {
+            border-top: 3px solid var(--text-secondary);
+        }
+        .func-node h5 {
+            font-size: 0.95rem;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+        .func-node p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0;
+        }
+        .func-connection {
+            position: absolute;
+            stroke: var(--accent);
+            stroke-width: 2;
+            fill: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI 编程助手 - AI 调用代码设计图</h1>
+            <p>专业级系统架构与流程可视化文档</p>
+        </header>
+
+        <div class="section">
+            <h2>1. 系统架构图</h2>
+            <p>清晰展示 AI 编程助手的三层架构设计，从用户界面到服务集成的完整层次结构和数据流向。</p>
+            <div class="diagram-container">
+                <div class="architecture-diagram">
+                    <div class="layer-row">
+                        <div class="layer-box header-layer">
+                            <div class="layer-icon">🖥️</div>
+                            <h4>用户界面层</h4>
+                            <ul>
+                                <li>📝 代码输入框</li>
+                                <li>🔤 语言选择</li>
+                                <li>🔑 API Key 输入</li>
+                                <li>📊 结果展示区域</li>
+                            </ul>
+                        </div>
+                        <div class="flow-arrow horizontal">→</div>
+                        <div class="layer-box logic-layer">
+                            <div class="layer-icon">⚙️</div>
+                            <h4>业务逻辑层</h4>
+                            <ul>
+                                <li>🔍 服务检测 <span class="code-tag">detectService()</span></li>
+                                <li>📦 请求构造</li>
+                                <li>🌐 API 调用 <span class="code-tag">callAI()</span></li>
+                                <li>📤 结果解析</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flow-line-vertical"></div>
+                    <div class="layer-row">
+                        <div class="layer-box service-layer" style="width: 400px;">
+                            <div class="layer-icon">🌍</div>
+                            <h4>服务集成层</h4>
+                            <ul>
+                                <li>⚡ 硅基流动 (DeepSeek-V4-Flash)</li>
+                                <li>🧠 DeepSeek (deepseek-chat)</li>
+                                <li>🤖 豆包 (Doubao)</li>
+                                <li>🔧 本地分析引擎</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 30px; color: var(--text-secondary); font-size: 0.95rem;">
+                    <strong>数据流方向：</strong> 用户界面层 → 业务逻辑层 → 服务集成层
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>2. AI 调用流程图</h2>
+            <p>从用户输入到结果展示的完整调用流程，展示 <code class="code-ref">getHelp()</code> 函数的执行路径。</p>
+            <div class="diagram-container">
+                <div class="flow-diagram">
+                    <div class="flow-step">
+                        <strong>用户输入代码和 API Key</strong>
+                        <p>从 UI 获取代码内容、编程语言选择、API Key</p>
+                    </div>
+                    <div class="flow-step">
+                        <strong>服务类型检测</strong>
+                        <p>调用 <code class="code-ref">detectService()</code> 自动识别或使用用户选择的服务</p>
+                    </div>
+                    <div class="flow-step">
+                        <strong>构造完整 Prompt</strong>
+                        <p>将代码和评分标准组合成完整的提示词</p>
+                    </div>
+                    <div class="flow-step">
+                        <strong>发送 HTTP 请求</strong>
+                        <p>调用 <code class="code-ref">fetch()</code> 发送 POST 请求到 AI 服务</p>
+                    </div>
+                    <div class="flow-step">
+                        <strong>处理响应</strong>
+                        <p>解析 JSON 响应，提取 AI 返回的辅导报告</p>
+                    </div>
+                    <div class="flow-step">
+                        <strong>Markdown 渲染</strong>
+                        <p>使用 <code class="code-ref">marked.js</code> 将 Markdown 转换为 HTML</p>
+                    </div>
+                    <div class="flow-step">
+                        <strong>显示结果</strong>
+                        <p>将解析后的内容显示到页面，应用状态样式</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>3. 服务选择流程图</h2>
+            <p>展示 <code class="code-ref">detectService()</code> 函数如何根据 API Key 自动选择合适的 AI 服务。</p>
+            <div class="diagram-container">
+                <div class="flow-diagram">
+                    <div class="flow-step">
+                        <strong>开始</strong>
+                        <p>用户输入 API Key</p>
+                    </div>
+                    <div class="decision-node">
+                        用户是否手动选择服务？
+                    </div>
+                    <div class="flow-step">
+                        <strong>是 → 使用用户选择的服务</strong>
+                        <p>读取 serviceType 下拉框的值</p>
+                    </div>
+                    <div class="flow-step">
+                        <strong>否 → 自动检测服务类型</strong>
+                        <p>根据 API Key 格式判断服务</p>
+                    </div>
+                    <div class="decision-node">
+                        API Key 格式检测
+                    </div>
+                    <div class="flow-step">
+                        <strong>sk- 开头且长度 > 50 → 硅基流动</strong>
+                    </div>
+                    <div class="flow-step">
+                        <strong>sk- 开头且长度 ≤ 50 → OpenAI</strong>
+                    </div>
+                    <div class="flow-step">
+                        <strong>包含 : → 百度千帆</strong>
+                    </div>
+                    <div class="flow-step">
+                        <strong>其他 → 豆包</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>4. AI 服务配置图</h2>
+            <p>展示 <code class="code-ref">AI_SERVICES</code> 对象中配置的所有支持的 AI 服务。</p>
+            <div class="diagram-container">
+                <div class="service-diagram">
+                    <div class="service-card">
+                        <div class="logo">⚡</div>
+                        <h4>硅基流动</h4>
+                        <p>api.siliconflow.cn</p>
+                        <span class="model-name">DeepSeek-V4-Flash</span>
+                    </div>
+                    <div class="service-card">
+                        <div class="logo">🧠</div>
+                        <h4>DeepSeek</h4>
+                        <p>api.deepseek.com</p>
+                        <span class="model-name">deepseek-chat</span>
+                    </div>
+                    <div class="service-card">
+                        <div class="logo">🤖</div>
+                        <h4>豆包</h4>
+                        <p>api.doubao.com</p>
+                        <span class="model-name">Doubao</span>
+                    </div>
+                    <div class="service-card">
+                        <div class="logo">💡</div>
+                        <h4>OpenAI</h4>
+                        <p>api.openai.com</p>
+                        <span class="model-name">gpt-3.5-turbo</span>
+                    </div>
+                    <div class="service-card">
+                        <div class="logo">🔍</div>
+                        <h4>百度千帆</h4>
+                        <p>aip.baidubce.com</p>
+                        <span class="model-name">ERNIE-Bot</span>
+                    </div>
+                    <div class="service-card">
+                        <div class="logo">🔧</div>
+                        <h4>本地分析</h4>
+                        <p>本地规则引擎</p>
+                        <span class="model-name">备用方案</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>5. 状态转换图</h2>
+            <p>展示系统在不同操作阶段的状态转换，包括空闲、加载、成功、错误四种状态。</p>
+            <div class="diagram-container">
+                <div class="status-diagram">
+                    <div class="status-node">
+                        <div class="status-circle status-idle">空闲</div>
+                        <span class="status-label">Idle</span>
+                    </div>
+                    <span class="status-arrow">→</span>
+                    <div class="status-node">
+                        <div class="status-circle status-loading">加载</div>
+                        <span class="status-label">Loading</span>
+                    </div>
+                    <span class="status-arrow">→</span>
+                    <div class="status-node">
+                        <div class="status-circle status-success">成功</div>
+                        <span class="status-label">Success</span>
+                    </div>
+                    <span class="status-arrow">↔</span>
+                    <div class="status-node">
+                        <div class="status-circle status-error">错误</div>
+                        <span class="status-label">Error</span>
+                    </div>
+                </div>
+                <p style="text-align: center; margin-top: 30px; color: var(--text-secondary); font-size: 0.95rem;">
+                    <strong>状态转换流程：</strong> 空闲 → 加载 → 成功/错误 → 空闲（循环）
+                </p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>6. 数据流图</h2>
+            <p>展示数据从输入到输出的完整流动过程。</p>
+            <div class="diagram-container">
+                <div class="data-flow">
+                    <div class="data-box">
+                        <div class="icon">📝</div>
+                        <div class="content">
+                            <h5>输入数据</h5>
+                            <p><code class="code-ref">code</code>, <code class="code-ref">language</code>, <code class="code-ref">apiKey</code></p>
+                        </div>
+                    </div>
+                    <div class="flow-connector">↓</div>
+                    <div class="data-box">
+                        <div class="icon">🔧</div>
+                        <div class="content">
+                            <h5>处理阶段</h5>
+                            <p>服务检测 → Prompt 构造 → API 调用 → 响应解析</p>
+                        </div>
+                    </div>
+                    <div class="flow-connector">↓</div>
+                    <div class="data-box">
+                        <div class="icon">📊</div>
+                        <div class="content">
+                            <h5>输出数据</h5>
+                            <p><code class="code-ref">{ success, result, service, error }</code></p>
+                        </div>
+                    </div>
+                    <div class="flow-connector">↓</div>
+                    <div class="data-box">
+                        <div class="icon">🎨</div>
+                        <div class="content">
+                            <h5>渲染展示</h5>
+                            <p>Markdown → HTML → DOM 注入 → CSS 样式</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>7. API 调用时序图</h2>
+            <p>展示前端页面与 AI 服务之间的交互时序。</p>
+            <div class="diagram-container">
+                <svg class="svg-diagram" width="900" height="450" viewBox="0 0 900 450">
+                    <rect x="60" y="50" width="140" height="70" rx="10" fill="#1e3a5f" />
+                    <text x="130" y="82" fill="white" text-anchor="middle" font-size="16" font-weight="bold">前端页面</text>
+                    <text x="130" y="102" fill="rgba(255,255,255,0.8)" text-anchor="middle" font-size="11">Frontend</text>
+                    
+                    <rect x="400" y="50" width="140" height="70" rx="10" fill="#00d4ff" />
+                    <text x="470" y="82" fill="#1e293b" text-anchor="middle" font-size="16" font-weight="bold">AI 服务</text>
+                    <text x="470" y="102" fill="#475569" text-anchor="middle" font-size="11">AI Service</text>
+                    
+                    <line x1="130" y1="120" x2="130" y2="380" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="6,4" />
+                    <line x1="470" y1="120" x2="470" y2="380" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="6,4" />
+                    
+                    <rect x="150" y="150" width="120" height="40" rx="6" fill="#dcfce7" />
+                    <text x="210" y="175" fill="#10b981" font-size="13" font-weight="500">getHelp() 调用</text>
+                    <line x1="270" y1="170" x2="400" y2="170" stroke="#10b981" stroke-width="2" marker-end="url(#arrow)" />
+                    
+                    <rect x="380" y="220" width="180" height="50" rx="6" fill="#fef3c7" />
+                    <text x="470" y="247" fill="#f59e0b" font-size="13" text-anchor="middle" font-weight="500">处理请求</text>
+                    <text x="470" y="265" fill="#d97706" font-size="10" text-anchor="middle">调用模型生成响应</text>
+                    
+                    <rect x="150" y="300" width="120" height="40" rx="6" fill="#dcfce7" />
+                    <text x="210" y="325" fill="#10b981" font-size="13" font-weight="500">响应结果</text>
+                    <line x1="150" y1="320" x2="470" y2="320" stroke="#10b981" stroke-width="2" marker-end="url(#arrow)" />
+                    
+                    <rect x="60" y="360" width="140" height="40" rx="6" fill="#1e3a5f" />
+                    <text x="130" y="385" fill="white" text-anchor="middle" font-size="13" font-weight="500">渲染结果</text>
+                    
+                    <defs>
+                        <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#10b981" />
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

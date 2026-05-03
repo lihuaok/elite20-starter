@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 编程助手 - AI 调用与结果处理设计文档</title>
+    <style>
+        :root {
+            --primary: #1e3a5f;
+            --accent: #00d4ff;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --bg: #f8fafc;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.7;
+            color: #1e293b;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, #2d5a87 100%);
+            color: white;
+            padding: 48px;
+            border-radius: 20px;
+            margin-bottom: 32px;
+        }
+        header h1 { font-size: 2rem; margin-bottom: 8px; }
+        header p { opacity: 0.9; font-size: 1.1rem; }
+        .section {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .section h2 {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 3px solid var(--accent);
+        }
+        .section h3 {
+            font-size: 1.25rem;
+            margin: 24px 0 12px;
+            color: #334155;
+            display: flex;
+            align-items: center;
+        }
+        .section h3::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+        .section h4 {
+            font-size: 1.1rem;
+            margin: 16px 0 8px;
+            color: #475569;
+        }
+        .code-block {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 20px 24px;
+            border-radius: 12px;
+            font-family: 'Consolas', 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            margin: 16px 0;
+            border: 1px solid #1e293b;
+        }
+        .table-container { overflow-x: auto; margin: 16px 0; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+        tr:hover { background: #f8fafc; }
+        ul, ol { padding-left: 28px; margin: 12px 0; }
+        li { margin: 10px 0; }
+        .highlight {
+            background: rgba(0, 212, 255, 0.1);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-family: monospace;
+        }
+        .note {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+        }
+        .success {
+            background: #dcfce7;
+            border-left: 4px solid #10b981;
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+        }
+        .diagram {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 16px 0;
+            border: 1px solid #e2e8f0;
+        }
+        .flow-item {
+            display: flex;
+            align-items: center;
+            margin: 12px 0;
+        }
+        .flow-item::before {
+            content: '';
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 16px;
+            flex-shrink: 0;
+        }
+        .flow-item:nth-child(1)::before { content: '1'; }
+        .flow-item:nth-child(2)::before { content: '2'; }
+        .flow-item:nth-child(3)::before { content: '3'; }
+        .flow-item:nth-child(4)::before { content: '4'; }
+        .flow-item:nth-child(5)::before { content: '5'; }
+        .flow-item:nth-child(6)::before { content: '6'; }
+        .api-box {
+            background: linear-gradient(135deg, rgba(30, 58, 95, 0.05) 0%, rgba(0, 212, 255, 0.05) 100%);
+            border: 1px solid rgba(30, 58, 95, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+        }
+        .api-box .method {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-right: 12px;
+        }
+        .api-box .endpoint {
+            font-family: monospace;
+            color: var(--primary);
+            font-weight: 500;
+        }
+        .service-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 12px 0;
+            border-left: 4px solid var(--accent);
+        }
+        .service-card h4 { margin-top: 0; color: var(--primary); }
+        .config-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+        .config-item:last-child { border-bottom: none; }
+        .config-item .label { color: #64748b; }
+        .config-item .value { font-family: monospace; color: var(--primary); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI 编程助手 - AI 调用与结果处理设计文档</h1>
+            <p>详细设计：多服务集成、API 调用实现、响应解析与结果渲染</p>
+        </header>
+
+        <div class="section">
+            <h2>1. AI 调用架构设计</h2>
+            <h3>1.1 整体架构</h3>
+            <p>系统采用分层架构设计，将 AI 调用逻辑与 UI 展示分离，支持多服务提供商的灵活切换。</p>
+            
+            <div class="diagram">
+                <strong style="display: block; margin-bottom: 16px; color: var(--primary);">AI 调用架构图</strong>
+                <div class="flow-item">用户输入层 → 代码输入、语言选择、API Key 配置</div>
+                <div class="flow-item">服务检测层 → 自动检测或手动选择 AI 服务</div>
+                <div class="flow-item">请求构造层 → Prompt 生成、参数配置、请求头设置</div>
+                <div class="flow-item">API 调用层 → 异步请求、超时处理、错误捕获</div>
+                <div class="flow-item">响应解析层 → JSON 解析、结果提取、异常处理</div>
+                <div class="flow-item">结果展示层 → Markdown 渲染、代码高亮、评分展示</div>
+            </div>
+
+            <h3>1.2 核心模块划分</h3>
+            <ul>
+                <li><span class="highlight">AI_SERVICES</span>：多服务配置对象</li>
+                <li><span class="highlight">detectService()</span>：服务检测函数</li>
+                <li><span class="highlight">callAI()</span>：核心 API 调用函数</li>
+                <li><span class="highlight">getDefaultAnalysis()</span>：本地分析引擎</li>
+                <li><span class="highlight">getHelp()</span>：主入口函数</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>2. 多服务支持设计</h2>
+            <h3>2.1 服务配置结构</h3>
+            <p>每个 AI 服务包含：name、url、getHeaders()、getBody()、parseResponse()</p>
+
+            <h3>2.2 各服务配置详情</h3>
+            
+            <div class="service-card">
+                <h4>硅基流动 (SiliconFlow)</h4>
+                <div class="config-item"><span class="label">URL</span><span class="value">https://api.siliconflow.cn/v1/chat/completions</span></div>
+                <div class="config-item"><span class="label">模型</span><span class="value">deepseek-ai/DeepSeek-V3</span></div>
+            </div>
+
+            <div class="service-card">
+                <h4>DeepSeek</h4>
+                <div class="config-item"><span class="label">URL</span><span class="value">https://api.deepseek.com/v1/chat/completions</span></div>
+                <div class="config-item"><span class="label">模型</span><span class="value">deepseek-chat</span></div>
+            </div>
+
+            <div class="service-card">
+                <h4>豆包 (Doubao)</h4>
+                <div class="config-item"><span class="label">URL</span><span class="value">https://api.doubao.com/chat/completions</span></div>
+                <div class="config-item"><span class="label">模型</span><span class="value">Doubao</span></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>3. 请求参数构造设计</h2>
+            <h3>3.1 Prompt 设计</h3>
+            <div class="code-block">
+const fullPrompt = `作为一名专业的编程辅导老师，请按照以下五个维度对代码进行详细分析：
+
+【代码辅导标准】
+1. 代码理解（20%）：对代码逻辑的解释清晰度
+2. 逻辑分析（20%）：分析代码问题的深度
+3. 调试技巧（20%）：提供具体的调试方法
+4. 最佳实践（20%）：推荐行业标准做法
+5. 架构设计（20%）：代码结构和可维护性
+
+【要求】
+- 输出格式：使用 Markdown 格式
+- 包含总体评分（0-100分）
+- 列出发现的问题（错误用🚨，警告用⚠️）
+- 提供具体的改进建议
+- 给出修复后的代码示例
+
+【待分析代码】
+语言：${language}
+
+\`\`\`${language}
+${code}
+\`\`\`
+
+请给出详细的辅导报告。`;
+            </div>
+
+            <h3>3.2 请求体参数</h3>
+            <div class="table-container">
+                <table>
+                    <tr><th>参数名</th><th>类型</th><th>值</th></tr>
+                    <tr><td>model</td><td>string</td><td>deepseek-ai/DeepSeek-V3</td></tr>
+                    <tr><td>messages</td><td>array</td><td>[{"role":"user","content":"..."}]</td></tr>
+                    <tr><td>max_tokens</td><td>integer</td><td>2048</td></tr>
+                    <tr><td>temperature</td><td>float</td><td>0.7</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>4. API 调用实现</h2>
+            <h3>4.1 核心调用流程</h3>
+            <div class="api-box">
+                <span class="method">POST</span>
+                <span class="endpoint">https://api.siliconflow.cn/v1/chat/completions</span>
+            </div>
+
+            <h3>4.2 异步调用实现</h3>
+            <div class="code-block">
+async function callAI(code, language, apiKey) {
+    const fullPrompt = `作为一名专业的编程辅导老师...`;
+    
+    const serviceType = detectService(apiKey);
+    const service = AI_SERVICES[serviceType];
+    
+    const cleanApiKey = sanitizeApiKey(apiKey);
+    if (!isValidAscii(cleanApiKey)) {
+        return { success: false, error: 'API Key 包含非法字符' };
+    }
+    
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
+        
+        const response = await fetch(service.url, {
+            method: 'POST',
+            headers: service.getHeaders(cleanApiKey),
+            body: JSON.stringify(service.getBody(fullPrompt)),
+            signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`API 请求失败: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        return { 
+            success: true, 
+            result: service.parseResponse(data),
+            service: service.name 
+        };
+        
+    } catch (error) {
+        return { 
+            success: false, 
+            error: error.message,
+            service: service.name 
+        };
+    }
+}
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>5. 响应解析设计</h2>
+            <h3>5.1 响应格式</h3>
+            <div class="code-block">
+{
+    "choices": [
+        {
+            "message": {
+                "role": "assistant",
+                "content": "辅导报告内容（Markdown格式）"
+            }
+        }
+    ],
+    "usage": {
+        "prompt_tokens": 150,
+        "completion_tokens": 850
+    }
+}
+            </div>
+
+            <h3>5.2 错误处理策略</h3>
+            <div class="table-container">
+                <table>
+                    <tr><th>错误类型</th><th>处理方式</th></tr>
+                    <tr><td>认证失败 (401)</td><td>提示 API Key 无效</td></tr>
+                    <tr><td>模型不存在 (400)</td><td>提示检查模型名称</td></tr>
+                    <tr><td>请求超时</td><td>提示超时并降级</td></tr>
+                    <tr><td>网络错误</td><td>提示检查网络连接</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>6. 结果处理流程</h2>
+            <h3>6.1 结果渲染流程</h3>
+            <div class="diagram">
+                <strong style="display: block; margin-bottom: 16px; color: var(--primary);">结果处理流程图</strong>
+                <div class="flow-item">AI 响应 → Markdown 字符串</div>
+                <div class="flow-item">marked.js 解析 → HTML 输出</div>
+                <div class="flow-item">DOM 注入 → 结果区域渲染</div>
+                <div class="flow-item">CSS 样式应用 → 代码高亮、表格美化</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>7. 降级机制设计</h2>
+            <h3>7.1 降级触发条件</h3>
+            <ul>
+                <li>API Key 为空或无效</li>
+                <li>AI 服务调用失败</li>
+                <li>网络连接超时</li>
+                <li>CORS 跨域错误</li>
+            </ul>
+
+            <div class="success">
+                <strong>降级机制优势：</strong>
+                <ul>
+                    <li>确保服务可用性</li>
+                    <li>提供基础分析能力</li>
+                    <li>减少 API 调用成本</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>8. 安全与性能优化</h2>
+            <h3>8.1 API Key 安全保护</h3>
+            <ul>
+                <li>使用 type="password" 隐藏输入</li>
+                <li>过滤非法字符和控制字符</li>
+                <li>使用 HTTPS 传输</li>
+                <li>本地缓存，不发送到服务器</li>
+            </ul>
+
+            <h3>8.2 性能优化策略</h3>
+            <div class="table-container">
+                <table>
+                    <tr><th>优化项</th><th>实现方式</th></tr>
+                    <tr><td>请求超时</td><td>30秒超时自动取消</td></tr>
+                    <tr><td>响应缓存</td><td>会话级别缓存</td></tr>
+                    <tr><td>延迟加载</td><td>defer 属性加载脚本</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

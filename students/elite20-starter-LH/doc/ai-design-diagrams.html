@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 编程助手 - 系统架构设计文档</title>
+    <style>
+        :root {
+            --primary: #1e3a5f;
+            --primary-light: #2d5a87;
+            --accent: #00d4ff;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --bg-light: #f8fafc;
+            --bg-card: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 40px 24px; }
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 48px;
+            border-radius: 20px;
+            margin-bottom: 32px;
+            box-shadow: 0 10px 40px rgba(30, 58, 95, 0.3);
+        }
+        header h1 { font-size: 2.2rem; margin-bottom: 8px; }
+        header p { opacity: 0.9; font-size: 1.1rem; }
+        .section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+        .section h2 {
+            color: var(--primary);
+            font-size: 1.6rem;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 3px solid var(--accent);
+        }
+        .section h3 {
+            font-size: 1.3rem;
+            margin: 28px 0 16px;
+            color: var(--primary);
+        }
+        .section p {
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            font-size: 1.05rem;
+        }
+        .diagram-container {
+            background: var(--bg-light);
+            border-radius: 16px;
+            padding: 40px;
+            margin: 16px 0;
+            overflow-x: auto;
+        }
+        .code-ref {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.85rem;
+        }
+        .layer-description {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 24px;
+        }
+        .layer-card {
+            background: var(--bg-light);
+            border-radius: 12px;
+            padding: 24px;
+            border-top: 4px solid var(--accent);
+        }
+        .layer-card.presentation { border-top-color: #8b5cf6; }
+        .layer-card.business { border-top-color: #3b82f6; }
+        .layer-card.data { border-top-color: #10b981; }
+        .layer-card h4 {
+            font-size: 1.15rem;
+            margin-bottom: 16px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .layer-card ul {
+            list-style: none;
+            padding: 0;
+        }
+        .layer-card li {
+            padding: 10px 12px;
+            background: var(--bg-card);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+        .layer-card li:last-child { margin-bottom: 0; }
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .tech-tag {
+            padding: 6px 14px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--primary);
+        }
+        .flow-description {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            border-radius: 0 8px 8px 0;
+            padding: 16px 20px;
+            margin: 16px 0;
+        }
+        .flow-description h5 {
+            color: #92400e;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+        .flow-description p {
+            margin-bottom: 0;
+            color: #78350f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI 编程助手 - 系统架构设计文档</h1>
+            <p>专业级三层架构设计 | 表示层 → 业务逻辑层 → 数据访问层</p>
+        </header>
+
+        <div class="section">
+            <h2>1. 系统架构图</h2>
+            <p>本系统采用经典的三层架构设计，清晰分离表示层、业务逻辑层和数据访问层，实现高内聚低耦合的软件设计原则。</p>
+            
+            <div class="diagram-container">
+                <svg width="100%" height="550" viewBox="0 0 1000 550">
+                    <defs>
+                        <linearGradient id="gradPresentation" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#a78bfa;stop-opacity:1" />
+                        </linearGradient>
+                        <linearGradient id="gradBusiness" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#60a5fa;stop-opacity:1" />
+                        </linearGradient>
+                        <linearGradient id="gradData" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#34d399;stop-opacity:1" />
+                        </linearGradient>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#00d4ff" />
+                        </marker>
+                        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.15"/>
+                        </filter>
+                    </defs>
+
+                    <rect x="100" y="30" width="800" height="140" rx="16" fill="url(#gradPresentation)" filter="url(#shadow)" />
+                    <rect x="110" y="40" width="780" height="120" rx="12" fill="rgba(255,255,255,0.15)" />
+                    <text x="500" y="105" fill="white" text-anchor="middle" font-size="22" font-weight="bold">表示层 (Presentation Layer)</text>
+                    
+                    <rect x="150" y="70" width="140" height="60" rx="8" fill="rgba(255,255,255,0.25)" />
+                    <text x="220" y="102" fill="white" text-anchor="middle" font-size="12">代码输入组件</text>
+                    
+                    <rect x="320" y="70" width="140" height="60" rx="8" fill="rgba(255,255,255,0.25)" />
+                    <text x="390" y="102" fill="white" text-anchor="middle" font-size="12">语言选择器</text>
+                    
+                    <rect x="490" y="70" width="140" height="60" rx="8" fill="rgba(255,255,255,0.25)" />
+                    <text x="560" y="102" fill="white" text-anchor="middle" font-size="12">API Key 输入</text>
+                    
+                    <rect x="660" y="70" width="140" height="60" rx="8" fill="rgba(255,255,255,0.25)" />
+                    <text x="730" y="102" fill="white" text-anchor="middle" font-size="12">结果展示区</text>
+
+                    <line x1="500" y1="170" x2="500" y2="210" stroke="#00d4ff" stroke-width="3" marker-end="url(#arrowhead)" />
+                    <circle cx="500" cy="190" r="8" fill="#00d4ff" />
+
+                    <rect x="100" y="230" width="800" height="140" rx="16" fill="url(#gradBusiness)" filter="url(#shadow)" />
+                    <rect x="110" y="240" width="780" height="120" rx="12" fill="rgba(255,255,255,0.15)" />
+                    <text x="500" y="305" fill="white" text-anchor="middle" font-size="22" font-weight="bold">业务逻辑层 (Business Logic Layer)</text>
+                    
+                    <rect x="180" y="270" width="160" height="60" rx="8" fill="rgba(255,255,255,0.25)" />
+                    <text x="260" y="302" fill="white" text-anchor="middle" font-size="12">detectService()</text>
+                    
+                    <rect x="380" y="270" width="160" height="60" rx="8" fill="rgba(255,255,255,0.25)" />
+                    <text x="460" y="302" fill="white" text-anchor="middle" font-size="12">callAI()</text>
+                    
+                    <rect x="580" y="270" width="160" height="60" rx="8" fill="rgba(255,255,255,0.25)" />
+                    <text x="660" y="302" fill="white" text-anchor="middle" font-size="12">结果解析模块</text>
+
+                    <line x1="500" y1="370" x2="500" y2="410" stroke="#00d4ff" stroke-width="3" marker-end="url(#arrowhead)" />
+                    <circle cx="500" cy="390" r="8" fill="#00d4ff" />
+
+                    <rect x="100" y="430" width="800" height="100" rx="16" fill="url(#gradData)" filter="url(#shadow)" />
+                    <rect x="110" y="440" width="780" height="80" rx="12" fill="rgba(255,255,255,0.15)" />
+                    <text x="500" y="485" fill="white" text-anchor="middle" font-size="22" font-weight="bold">数据访问层 (Data Access Layer)</text>
+                    
+                    <rect x="200" y="455" width="120" height="50" rx="6" fill="rgba(255,255,255,0.25)" />
+                    <text x="260" y="482" fill="white" text-anchor="middle" font-size="11">硅基流动</text>
+                    
+                    <rect x="350" y="455" width="120" height="50" rx="6" fill="rgba(255,255,255,0.25)" />
+                    <text x="410" y="482" fill="white" text-anchor="middle" font-size="11">DeepSeek</text>
+                    
+                    <rect x="500" y="455" width="120" height="50" rx="6" fill="rgba(255,255,255,0.25)" />
+                    <text x="560" y="482" fill="white" text-anchor="middle" font-size="11">豆包</text>
+                    
+                    <rect x="650" y="455" width="120" height="50" rx="6" fill="rgba(255,255,255,0.25)" />
+                    <text x="710" y="482" fill="white" text-anchor="middle" font-size="11">本地分析</text>
+
+                    <rect x="20" y="30" width="60" height="500" rx="8" fill="#1e3a5f" />
+                    <text x="50" y="100" fill="white" text-anchor="middle" font-size="10" transform="rotate(-90, 50, 100)">用户交互</text>
+                    <text x="50" y="300" fill="white" text-anchor="middle" font-size="10" transform="rotate(-90, 50, 300)">业务处理</text>
+                    <text x="50" y="480" fill="white" text-anchor="middle" font-size="10" transform="rotate(-90, 50, 480)">数据访问</text>
+                </svg>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>2. 各层功能描述</h2>
+            
+            <div class="layer-description">
+                <div class="layer-card presentation">
+                    <h4>🖥️ 表示层</h4>
+                    <ul>
+                        <li>代码输入框 - 支持多种编程语言语法高亮</li>
+                        <li>语言选择器 - 支持 Java/Python/JavaScript 等</li>
+                        <li>API Key 输入 - 安全的密钥管理</li>
+                        <li>结果展示区 - Markdown 渲染输出</li>
+                    </ul>
+                    <div class="tech-stack">
+                        <span class="tech-tag">HTML5</span>
+                        <span class="tech-tag">CSS3</span>
+                        <span class="tech-tag">JavaScript</span>
+                        <span class="tech-tag">marked.js</span>
+                    </div>
+                </div>
+                
+                <div class="layer-card business">
+                    <h4>⚙️ 业务逻辑层</h4>
+                    <ul>
+                        <li>服务检测 - 根据 API Key 自动识别服务类型</li>
+                        <li>Prompt 构造 - 生成专业的代码分析提示词</li>
+                        <li>API 调用 - 封装 HTTP 请求逻辑</li>
+                        <li>结果解析 - 统一响应格式处理</li>
+                    </ul>
+                    <div class="tech-stack">
+                        <span class="tech-tag">Fetch API</span>
+                        <span class="tech-tag">Promise</span>
+                        <span class="tech-tag">async/await</span>
+                    </div>
+                </div>
+                
+                <div class="layer-card data">
+                    <h4>🌐 数据访问层</h4>
+                    <ul>
+                        <li>硅基流动 - DeepSeek-V4-Flash 模型</li>
+                        <li>DeepSeek - deepseek-chat 模型</li>
+                        <li>豆包 - Doubao 模型</li>
+                        <li>本地分析 - 规则引擎备用方案</li>
+                    </ul>
+                    <div class="tech-stack">
+                        <span class="tech-tag">REST API</span>
+                        <span class="tech-tag">JSON</span>
+                        <span class="tech-tag">HTTP/HTTPS</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>3. 组件交互流程</h2>
+            
+            <div class="flow-description">
+                <h5>📋 完整调用流程</h5>
+                <p><strong>1. 用户输入</strong> → 用户在表示层输入代码和 API Key<br>
+                <strong>2. 服务检测</strong> → 业务逻辑层调用 <code class="code-ref">detectService()</code> 识别服务类型<br>
+                <strong>3. 请求构造</strong> → 构建完整的 Prompt 和 HTTP 请求参数<br>
+                <strong>4. API 调用</strong> → 业务逻辑层调用 <code class="code-ref">callAI()</code> 发起请求<br>
+                <strong>5. 数据访问</strong> → 数据访问层根据服务类型调用对应 AI 服务<br>
+                <strong>6. 响应处理</strong> → 解析响应并转换为统一格式<br>
+                <strong>7. 结果展示</strong> → 表示层渲染 Markdown 结果</p>
+            </div>
+
+            <h3>3.1 服务检测流程</h3>
+            <p>业务逻辑层通过 <code class="code-ref">detectService()</code> 函数自动检测 API Key 所属服务：</p>
+            <ul>
+                <li><strong>sk- 开头且长度 > 50</strong> → 硅基流动 (SiliconFlow)</li>
+                <li><strong>sk- 开头且长度 ≤ 50</strong> → OpenAI 兼容服务</li>
+                <li><strong>包含 ":" 分隔符</strong> → 百度千帆</li>
+                <li><strong>其他格式</strong> → 豆包 (Doubao)</li>
+            </ul>
+
+            <h3>3.2 请求处理流程</h3>
+            <p>核心调用函数 <code class="code-ref">callAI()</code> 的处理逻辑：</p>
+            <ol>
+                <li>清理和验证 API Key（<code class="code-ref">sanitizeApiKey()</code>）</li>
+                <li>根据服务类型获取配置（<code class="code-ref">AI_SERVICES</code>）</li>
+                <li>构造包含代码分析提示的完整 Prompt</li>
+                <li>设置超时机制（<code class="code-ref">timeoutPromise()</code>）</li>
+                <li>发送 HTTP POST 请求并处理响应</li>
+                <li>调用 <code class="code-ref">parseResponse()</code> 提取结果</li>
+            </ol>
+        </div>
+
+        <div class="section">
+            <h2>4. 技术选型</h2>
+            
+            <h3>4.1 前端技术栈</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 16px;">
+                <thead>
+                    <tr>
+                        <th style="border: 1px solid #e2e8f0; padding: 12px; text-align: left;">技术</th>
+                        <th style="border: 1px solid #e2e8f0; padding: 12px; text-align: left;">版本</th>
+                        <th style="border: 1px solid #e2e8f0; padding: 12px; text-align: left;">用途</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="border: 1px solid #e2e8f0; padding: 12px;">HTML5</td>
+                        <td style="border: 1px solid #e2e8f0; padding: 12px;">标准</td>
+                        <td style="border: 1px solid #e2e8f0; padding: 12px;">页面结构定义</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #e2e8f0; padding: 12px;">CSS3</td>
+                        <td style="border: 1px solid #e2e8f0; padding: 12px;">标准</td>
+                        <td style="border: 1px solid #e2e8f0; padding: 12px;">样式设计与动画</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #e2e8f0; padding: 12px;">JavaScript</td>
+                        <td style="border: 1px solid #e2e8f0; padding: 12px;">ES6+</td>
+                        <td style="border: 1px solid #e2e8f0; padding: 12px;">业务逻辑实现</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #e2e8f0; padding: 12px;">marked.js</td>
+                        <td style="border: 1px solid #e2e8f0; padding: 12px;">4.x</td>
+                        <td style="border: 1px solid #e2e8f0; padding: 12px;">Markdown 渲染</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>4.2 AI 服务配置</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 16px;">
+                <thead>
+                    <tr>
+                        <th style="border: 1px solid #e2e8f0; padding: 12px; text-align: left;">服务名称</th>
+                        <th style="border: 1px solid #e2e8f0; padding: 12px; text-align: left;">API 端点</th>
+                        <th style="border: 1px solid #e2e8f0; padding: 12px; text-align: left;">模型</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="border: 1px solid #e2e8f0; padding: 12px;">硅基流动</td>
+                        <td style="border: 1px solid #e2e8f0; padding: 12px;">api.siliconflow.cn</td>
+                        <td style="border: 1px solid #e2e8f0; padding: 12px;">DeepSeek-V4-Flash</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #e2e8f0; padding: 12px;">DeepSeek</td>
+                        <td style="border: 1px solid #e2e8f0; padding: 12px;">api.deepseek.com</td>
+                        <td style="border: 1px solid #e2e8f0; padding: 12px;">deepseek-chat</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #e2e8f0; padding: 12px;">豆包</td>
+                        <td style="border: 1px solid #e2e8f0; padding: 12px;">api.doubao.com</td>
+                        <td style="border: 1px solid #e2e8f0; padding: 12px;">Doubao</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #e2e8f0; padding: 12px;">OpenAI</td>
+                        <td style="border: 1px solid #e2e8f0; padding: 12px;">api.openai.com</td>
+                        <td style="border: 1px solid #e2e8f0; padding: 12px;">gpt-3.5-turbo</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>5. 架构设计原则</h2>
+            
+            <ul>
+                <li><strong>分层解耦</strong>：各层职责明确，通过接口交互，降低耦合度</li>
+                <li><strong>单一职责</strong>：每个组件只负责一个功能，便于维护和测试</li>
+                <li><strong>依赖倒置</strong>：高层模块不依赖低层模块，都依赖抽象接口</li>
+                <li><strong>开闭原则</strong>：对扩展开放，对修改封闭</li>
+                <li><strong>降级机制</strong>：当 AI 服务不可用时，自动切换到本地分析引擎</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>6. 核心函数关系图</h2>
+            
+            <div class="diagram-container">
+                <svg width="100%" height="350" viewBox="0 0 800 350">
+                    <defs>
+                        <marker id="arrowSmall" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+                            <polygon points="0 0, 8 2.5, 0 5" fill="#1e3a5f" />
+                        </marker>
+                    </defs>
+
+                    <rect x="320" y="30" width="160" height="60" rx="10" fill="#1e3a5f" />
+                    <text x="400" y="65" fill="white" text-anchor="middle" font-size="14" font-weight="bold">getHelp()</text>
+
+                    <rect x="100" y="120" width="120" height="50" rx="8" fill="#00d4ff" />
+                    <text x="160" y="150" fill="#1e293b" text-anchor="middle" font-size="12" font-weight="500">detectService()</text>
+
+                    <rect x="280" y="120" width="120" height="50" rx="8" fill="#10b981" />
+                    <text x="340" y="150" fill="white" text-anchor="middle" font-size="12" font-weight="500">callAI()</text>
+
+                    <rect x="460" y="120" width="120" height="50" rx="8" fill="#f59e0b" />
+                    <text x="520" y="150" fill="#1e293b" text-anchor="middle" font-size="12" font-weight="500">sanitizeApiKey()</text>
+
+                    <rect x="150" y="210" width="100" height="40" rx="6" fill="#94a3b8" />
+                    <text x="200" y="235" fill="white" text-anchor="middle" font-size="11">AI_SERVICES</text>
+
+                    <rect x="300" y="210" width="100" height="40" rx="6" fill="#94a3b8" />
+                    <text x="350" y="235" fill="white" text-anchor="middle" font-size="11">timeoutPromise()</text>
+
+                    <rect x="450" y="210" width="100" height="40" rx="6" fill="#94a3b8" />
+                    <text x="500" y="235" fill="white" text-anchor="middle" font-size="11">marked.js</text>
+
+                    <rect x="600" y="210" width="100" height="40" rx="6" fill="#ef4444" />
+                    <text x="650" y="235" fill="white" text-anchor="middle" font-size="11">getDefaultAnalysis()</text>
+
+                    <line x1="400" y1="90" x2="160" y2="120" stroke="#1e3a5f" stroke-width="2" marker-end="url(#arrowSmall)" />
+                    <line x1="400" y1="90" x2="340" y2="120" stroke="#1e3a5f" stroke-width="2" marker-end="url(#arrowSmall)" />
+                    <line x1="400" y1="90" x2="520" y2="120" stroke="#1e3a5f" stroke-width="2" marker-end="url(#arrowSmall)" />
+                    
+                    <line x1="340" y1="170" x2="200" y2="210" stroke="#10b981" stroke-width="2" marker-end="url(#arrowSmall)" />
+                    <line x1="340" y1="170" x2="350" y2="210" stroke="#10b981" stroke-width="2" marker-end="url(#arrowSmall)" />
+                    
+                    <line x1="400" y1="90" x2="650" y2="210" stroke="#ef4444" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arrowSmall)" />
+                    <line x1="400" y1="90" x2="500" y2="210" stroke="#1e3a5f" stroke-width="2" marker-end="url(#arrowSmall)" />
+                </svg>
+            </div>
+            <p style="text-align: center; color: var(--text-secondary); margin-top: 16px;">
+                <strong>函数调用关系：</strong> getHelp() 为主入口，协调各子函数完成 AI 调用流程
+            </p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI编程助手 - 专业的代码辅导平台，帮助提升编程能力">
+    <meta name="theme-color" content="#1e3a5f">
+    <title>AI 编程助手 - 专业代码辅导平台</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e3a5f;
+            --primary-light: #2d5a87;
+            --accent: #00d4ff;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --bg-50: #f8fafc;
+            --bg-100: #f1f5f9;
+            --text-600: #475569;
+            --text-800: #1e293b;
+            --text-900: #0f172a;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            --shadow-glow: 0 0 40px rgba(0, 212, 255, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--bg-50) 0%, var(--bg-100) 100%);
+            min-height: 100vh;
+            line-height: 1.6;
+            color: var(--text-800);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 12px;
+            }
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 60px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 64px;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            margin-bottom: 24px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .logo svg {
+            width: 32px;
+            height: 32px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, white 0%, rgba(255, 255, 255, 0.8) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            font-size: 1.125rem;
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 8px;
+        }
+
+        .motto {
+            font-size: 0.9375rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-style: italic;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-top: 48px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(0, 212, 255, 0.15);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+
+        .feature-icon svg {
+            width: 24px;
+            height: 24px;
+            fill: var(--accent);
+        }
+
+        .feature-card h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .feature-card p {
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        main {
+            padding: 60px 0;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--shadow-md);
+            padding: 32px;
+            margin-bottom: 24px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.375rem;
+            font-weight: 600;
+            color: var(--text-900);
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--bg-100);
+        }
+
+        .card-title svg {
+            width: 24px;
+            height: 24px;
+            fill: var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-800);
+            margin-bottom: 8px;
+        }
+
+        select {
+            width: 100%;
+            max-width: 280px;
+            padding: 12px 16px;
+            font-family: inherit;
+            font-size: 1rem;
+            background: var(--bg-50);
+            border: 2px solid var(--bg-100);
+            border-radius: 12px;
+            color: var(--text-900);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+        }
+
+        select:hover {
+            border-color: var(--primary);
+            background-color: white;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 16px;
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.875rem;
+            background: var(--bg-50);
+            border: 2px solid var(--bg-100);
+            border-radius: 12px;
+            color: var(--text-900);
+            resize: vertical;
+            transition: all 0.2s ease;
+            line-height: 1.6;
+        }
+
+        textarea:hover {
+            border-color: var(--primary);
+            background-color: white;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+            background-color: white;
+        }
+
+        textarea::placeholder {
+            color: var(--text-600);
+        }
+
+        input[type="password"] {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px 16px;
+            font-family: inherit;
+            font-size: 0.875rem;
+            background: var(--bg-50);
+            border: 2px solid var(--bg-100);
+            border-radius: 12px;
+            color: var(--text-900);
+            transition: all 0.2s ease;
+        }
+
+        input[type="password"]:hover {
+            border-color: var(--primary);
+            background-color: white;
+        }
+
+        input[type="password"]:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+            background-color: white;
+        }
+
+        input[type="password"]::placeholder {
+            color: var(--text-600);
+            font-style: italic;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 32px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn svg {
+            width: 20px;
+            height: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .btn:hover svg {
+            transform: translateX(4px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #result {
+            background: linear-gradient(135deg, var(--bg-50) 0%, white 100%);
+            border: 2px solid var(--bg-100);
+            border-radius: 12px;
+            padding: 24px;
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.875rem;
+            color: var(--text-800);
+            min-height: 300px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            transition: all 0.3s ease;
+        }
+
+        #result.loading {
+            color: var(--text-600);
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #result.loading::after {
+            content: '';
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--primary);
+            border-top-color: transparent;
+            border-radius: 50%;
+            margin-left: 12px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .result-success {
+            border-color: var(--success) !important;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, white 100%) !important;
+        }
+
+        .result-error {
+            border-color: var(--error) !important;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, white 100%) !important;
+        }
+
+        .result-warning {
+            border-color: var(--warning) !important;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, white 100%) !important;
+        }
+
+        footer {
+            background: var(--text-900);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 48px 0;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .footer-brand svg {
+            width: 32px;
+            height: 32px;
+            fill: var(--accent);
+        }
+
+        .footer-brand span {
+            font-size: 1rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent);
+        }
+
+        .copyright {
+            font-size: 0.8125rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 40px 0;
+            }
+
+            h1 {
+                font-size: 1.875rem;
+            }
+
+            .tagline {
+                font-size: 1rem;
+            }
+
+            .features {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+                margin-top: 32px;
+            }
+
+            .card {
+                padding: 24px;
+            }
+
+            .card-title {
+                font-size: 1.125rem;
+            }
+
+            main {
+                padding: 40px 0;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-links {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header {
+                padding: 32px 0;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            .feature-card {
+                padding: 20px;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            select {
+                max-width: 100%;
+            }
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-slide-up {
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-scale-in {
+            animation: scaleIn 0.4s ease-out;
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .feature-card:nth-child(1) { animation-delay: 0.1s; }
+        .feature-card:nth-child(2) { animation-delay: 0.2s; }
+        .feature-card:nth-child(3) { animation-delay: 0.3s; }
+        .feature-card:nth-child(4) { animation-delay: 0.4s; }
+
+        ::selection {
+            background: rgba(0, 212, 255, 0.2);
+            color: var(--text-900);
+        }
+
+        code {
+            background: rgba(30, 58, 95, 0.08);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875em;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo animate-scale-in">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                </div>
+                <h1 class="animate-fade-in">华砺AI编程助手</h1>
+                <p class="tagline animate-slide-up">专业的代码辅导平台，帮助你提升编程能力。  致谢胡教授、佟博士、肖博士和精英版的全体师生</p>
+               
+                <p class="motto">完成任务是能力答卷，超越任务是认知革命，改进超星的不足是本次的目标</p>
+                  
+                
+                <div class="features animate-fade-in">
+                    <div class="feature-card animate-slide-up">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                        </div>
+                        <h3>代码理解</h3>
+                        <p>逐行分析代码逻辑，深入理解编程思想</p>
+                    </div>
+                    
+                    <div class="feature-card animate-slide-up">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M12 6v6l4 2"></path>
+                            </svg>
+                        </div>
+                        <h3>逻辑分析</h3>
+                        <p>深入分析代码思路，发现潜在问题</p>
+                    </div>
+                    
+                    <div class="feature-card animate-slide-up">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                        </div>
+                        <h3>调试技巧</h3>
+                        <p>提供专业调试方法，快速定位问题</p>
+                    </div>
+                    
+                    <div class="feature-card animate-slide-up">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                            </svg>
+                        </div>
+                        <h3>最佳实践</h3>
+                        <p>推荐行业标准做法，提升代码质量</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="card animate-fade-in">
+            <h2 class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                输入你的代码
+            </h2>
+            
+            <form id="codeForm" novalidate>
+                <div class="form-group">
+                    <label for="language">
+                        <span class="sr-only">选择编程语言</span>
+                    </label>
+                    <select id="language" aria-label="选择编程语言">
+                        <option value="kotlin">Kotlin</option>
+                        <option value="python">Python</option>
+                        <option value="java">Java</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="cpp">C++</option>
+                        <option value="c">C</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="serviceType">AI 服务提供商</label>
+                    <select id="serviceType" aria-label="选择 AI 服务">
+                        <option value="auto">自动检测</option>
+                        <option value="siliconflow">硅基流动 (SiliconFlow)</option>
+                        <option value="deepseek">DeepSeek</option>
+                        <option value="openai">OpenAI</option>
+                        <option value="doubao">豆包</option>
+                        <option value="qianfan">百度千帆</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="apiKey">
+                        <span class="sr-only">API Key</span>
+                    </label>
+                    <input 
+                        type="password" 
+                        id="apiKey" 
+                        placeholder="（可选）输入你的 AI API Key 以启用真实 AI 分析"
+                        aria-label="AI API Key"
+                        maxlength="200"
+                    />
+                    <small style="color: var(--text-600); font-size: 0.75rem; display: block; margin-top: 8px;">
+                        💡 提示：输入有效的 API Key 后将使用真实 AI 分析，否则使用本地分析引擎
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="codeInput">代码内容</label>
+                    <textarea 
+                        id="codeInput" 
+                        placeholder="请在此输入你想要辅导的代码..."
+                        aria-label="代码输入区域"
+                        spellcheck="false"
+                    >// Kotlin 代码示例
+for(item in ArrayList) {
+for(item in ArrayList) {
+    println(item)
+}
+}</textarea>
+                </div>
+                
+                <button type="button" class="btn" id="submitBtn" onclick="getHelp()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+                    </svg>
+                    获取辅导
+                </button>
+            </form>
+        </section>
+
+        <section class="card animate-fade-in" style="animation-delay: 0.1s">
+            <h2 class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M14 2 22 8l-8 6-8-6 8-6z"></path>
+                    <path d="M14 2 22 8l-8 6-8-6 8-6z"></path>
+                </svg>
+                辅导结果
+            </h2>
+            
+            <div id="result" role="status" aria-live="polite">点击上方按钮开始获取代码辅导...</div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    <span>AI 编程助手</span>
+                </div>
+                
+                <div class="footer-links">
+                    <a href="#features" aria-label="功能介绍">功能介绍</a>
+                    <a href="#usage" aria-label="使用指南">使用指南</a>
+                    <a href="#about" aria-label="关于我们">关于我们</a>
+                </div>
+                
+                <p class="copyright">© 2026 AI 编程助手 | 李华设计实现 | 版权所有，仅授权给精英班所有的老师和学生</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const AI_SERVICES = {
+            doubao: {
+                name: '豆包',
+                url: 'https://api.doubao.com/chat/completions',
+                getHeaders: (apiKey) => ({
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                }),
+                getBody: (prompt) => ({
+                    model: 'Doubao',
+                    messages: [{ role: 'user', content: prompt }],
+                    max_tokens: 2048,
+                    temperature: 0.7
+                }),
+                parseResponse: (data) => data.choices?.[0]?.message?.content || data.result || '未获取到响应'
+            },
+            deepseek: {
+                name: 'DeepSeek',
+                url: 'https://api.deepseek.com/v1/chat/completions',
+                getHeaders: (apiKey) => ({
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                }),
+                getBody: (prompt) => ({
+                    model: 'deepseek-chat',
+                    messages: [{ role: 'user', content: prompt }],
+                    max_tokens: 2048,
+                    temperature: 0.7
+                }),
+                parseResponse: (data) => data.choices?.[0]?.message?.content || '未获取到响应'
+            },
+            siliconflow: {
+                name: '硅基流动',
+                url: 'https://api.siliconflow.cn/v1/chat/completions',
+                getHeaders: (apiKey) => ({
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                }),
+                getBody: (prompt) => ({
+                    model: 'deepseek-ai/DeepSeek-V4-Flash',
+                    messages: [{ role: 'user', content: prompt }],
+                    max_tokens: 4096,
+                    temperature: 0.7
+                }),
+                parseResponse: (data) => data.choices?.[0]?.message?.content || data.result || '未获取到响应'
+            },
+            openai: {
+                name: 'OpenAI',
+                url: 'https://api.openai.com/v1/chat/completions',
+                getHeaders: (apiKey) => ({
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                }),
+                getBody: (prompt) => ({
+                    model: 'gpt-3.5-turbo',
+                    messages: [{ role: 'user', content: prompt }],
+                    max_tokens: 2048,
+                    temperature: 0.7
+                }),
+                parseResponse: (data) => data.choices?.[0]?.message?.content || '未获取到响应'
+            },
+            qianfan: {
+                name: '百度千帆',
+                url: 'https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions',
+                getHeaders: (apiKey) => ({
+                    'Content-Type': 'application/json'
+                }),
+                getBody: (prompt, apiKey) => {
+                    const parts = apiKey.split(':');
+                    return {
+                        api_key: parts[0] || apiKey,
+                        secret_key: parts[1] || '',
+                        messages: [{ role: 'user', content: prompt }],
+                        max_tokens: 2048,
+                        temperature: 0.7
+                    };
+                },
+                parseResponse: (data) => data.result || data.choices?.[0]?.message?.content || '未获取到响应'
+            }
+        };
+
+        function isValidAscii(str) {
+            for (let i = 0; i < str.length; i++) {
+                if (str.charCodeAt(i) > 127) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function sanitizeApiKey(apiKey) {
+            if (!apiKey) return '';
+            let sanitized = apiKey.trim();
+            sanitized = sanitized.replace(/[\u0000-\u001F\u007F-\uFFFF]/g, '');
+            return sanitized;
+        }
+
+        function detectService(apiKey) {
+            const cleanKey = sanitizeApiKey(apiKey);
+            console.log('API Key 长度:', cleanKey.length, '前10字符:', cleanKey.substring(0, 10));
+            
+            const serviceSelect = document.getElementById('serviceType');
+            if (serviceSelect && serviceSelect.value !== 'auto') {
+                const selectedService = serviceSelect.value;
+                console.log('用户手动选择服务:', AI_SERVICES[selectedService]?.name || selectedService);
+                return selectedService;
+            }
+            
+            if (cleanKey.startsWith('sk-')) {
+                if (cleanKey.length > 50) {
+                    console.log('检测到硅基流动/DeepSeek API Key');
+                    return 'siliconflow';
+                }
+                console.log('检测到 OpenAI API Key');
+                return 'openai';
+            }
+            if (cleanKey.includes(':')) {
+                console.log('检测到百度千帆 API Key');
+                return 'qianfan';
+            }
+            console.log('检测到豆包 API Key');
+            return 'doubao';
+        }
+
+        function timeoutPromise(promise, ms) {
+            return new Promise((resolve, reject) => {
+                const timer = setTimeout(() => {
+                    reject(new Error(`请求超时（${ms/1000}秒）`));
+                }, ms);
+                promise.then(
+                    (result) => {
+                        clearTimeout(timer);
+                        resolve(result);
+                    },
+                    (err) => {
+                        clearTimeout(timer);
+                        reject(err);
+                    }
+                );
+            });
+        }
+
+        async function callAI(code, language, apiKey) {
+            const cleanApiKey = sanitizeApiKey(apiKey);
+            const fullPrompt = `作为一名专业的编程辅导老师，请按照以下五个维度对代码进行详细分析：
+
+【代码辅导标准】
+1. 代码理解（20%）：对代码逻辑的解释清晰度
+2. 逻辑分析（20%）：分析代码问题的深度
+3. 调试技巧（20%）：提供具体的调试方法
+4. 最佳实践（20%）：推荐行业标准做法
+5. 架构设计（20%）：代码结构和可维护性
+
+【要求】
+- 输出格式：使用 Markdown 格式
+- 包含总体评分（0-100分）
+- 列出发现的问题（错误用🚨，警告用⚠️）
+- 提供具体的改进建议
+- 给出修复后的代码示例
+
+【待分析代码】
+语言：${language}
+
+\`\`\`${language}
+${code}
+\`\`\`
+
+请给出详细的辅导报告。`;
+
+            const serviceType = detectService(cleanApiKey);
+            const service = AI_SERVICES[serviceType];
+            
+            console.log(`检测到服务类型: ${service.name}`, `API Key 长度: ${cleanApiKey.length}`);
+
+            if (!isValidAscii(cleanApiKey)) {
+                console.error('API Key 包含非 ASCII 字符');
+                return { success: false, error: 'API Key 包含非法字符，请检查是否有复制粘贴带来的隐藏字符', service: service.name };
+            }
+
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => {
+                    controller.abort();
+                }, 180000);
+
+                const headers = service.getHeaders(cleanApiKey);
+                console.log('请求头:', JSON.stringify(headers));
+
+                const response = await fetch(service.url, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(service.getBody(fullPrompt, cleanApiKey)),
+                    signal: controller.signal,
+                    mode: 'cors'
+                });
+
+                clearTimeout(timeoutId);
+                console.log('API 响应状态:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('API 错误详情:', errorText);
+                    throw new Error(`API 请求失败 (${response.status}): ${errorText.substring(0, 200)}`);
+                }
+
+                const data = await response.json();
+                console.log('API 响应数据:', JSON.stringify(data).substring(0, 500));
+                
+                const result = service.parseResponse(data);
+                return { success: true, result, service: service.name };
+            } catch (error) {
+                console.error('AI API 调用失败:', error.message);
+                let errorMsg = error.message;
+                if (error.name === 'AbortError') {
+                    errorMsg = '请求超时（180秒），可能是模型推理较慢或网络延迟，请重试或换用较小模型';
+                } else if (error.message.includes('Failed to fetch')) {
+                    errorMsg = '网络连接失败，请检查网络或 VPN 设置';
+                } else if (error.message.includes('CORS')) {
+                    errorMsg = '跨域访问被阻止，请使用 CORS 代理或后端服务';
+                } else if (error.message.includes('non ISO-8859-1')) {
+                    errorMsg = '请求头包含非法字符，请检查 API Key 是否有隐藏字符';
+                } else if (error.message.includes('Failed to read')) {
+                    errorMsg = 'API Key 格式错误，请确保复制正确';
+                }
+                return { success: false, error: errorMsg, service: service.name };
+            }
+        }
+
+        function getDefaultAnalysis(code, language) {
+            let issues = [];
+            let score = 70;
+            let suggestions = [];
+            let fixCode = code;
+
+            if (!code.trim()) {
+                return { score: 0, result: "❌ 代码为空，请输入代码" };
+            }
+
+            const lines = code.split('\n');
+            let openBrace = 0;
+            let openParen = 0;
+
+            lines.forEach((line) => {
+                openBrace += (line.match(/\{/g) || []).length;
+                openBrace -= (line.match(/\}/g) || []).length;
+                openParen += (line.match(/\(/g) || []).length;
+                openParen -= (line.match(/\)/g) || []).length;
+            });
+
+            if (openBrace !== 0) {
+                issues.push(`🚨 大括号不匹配！有 ${Math.abs(openBrace)} 个括号未闭合`);
+                score -= 15;
+            }
+
+            if (openParen !== 0) {
+                issues.push(`🚨 小括号不匹配！有 ${Math.abs(openParen)} 个括号未闭合`);
+                score -= 15;
+            }
+
+            if (code.includes("/") && code.includes("0")) {
+                issues.push("⚠️ 注意除数不能为零的情况");
+                score -= 10;
+            }
+
+            switch(language) {
+                case 'kotlin':
+                    if (code.includes("ArrayList)") && !code.includes("ArrayList<")) {
+                        issues.push("🚨 ArrayList 需要指定泛型类型并实例化，如 ArrayList<String>()");
+                        score -= 10;
+                    }
+                    if (code.includes("ArrayList)") && !code.includes("val ") && !code.includes("var ")) {
+                        issues.push("⚠️ ArrayList 似乎未定义，需要先声明变量");
+                        score -= 5;
+                    }
+                    suggestions = ["使用 val/var 声明变量", "ArrayList 需要指定泛型类型", "确保括号正确匹配", "使用适当的缩进", "添加 main 函数作为入口"];
+                    fixCode = "// ✅ 修复后的 Kotlin 代码\nfun main() {\n    val arrayList = ArrayList<String>()\n    arrayList.add(\"元素1\")\n    for (item in arrayList) {\n        println(item)\n    }\n}";
+                    break;
+                case 'python':
+                    if (!code.includes("def ") && !code.includes("class ")) {
+                        issues.push("⚠️ 建议封装为函数或类");
+                        score -= 5;
+                    }
+                    suggestions = ["添加错误处理", "使用类型注解", "添加文档字符串", "考虑使用类型提示"];
+                    break;
+                case 'java':
+                    if (!code.includes("class ")) {
+                        issues.push("🚨 Java 需要包含类定义");
+                        score -= 20;
+                    }
+                    if (!code.includes("main")) {
+                        issues.push("⚠️ 建议添加 main 方法作为入口");
+                        score -= 10;
+                    }
+                    suggestions = ["添加类定义", "添加 main 方法", "注意代码格式", "使用访问修饰符"];
+                    break;
+                default:
+                    suggestions = ["注意代码格式规范", "添加适当的注释", "考虑错误处理"];
+            }
+
+            let output = "【代码辅导报告】\n\n";
+            output += `📊 总体评分：${Math.max(0, score)}/100\n\n`;
+
+            if (issues.length > 0) {
+                output += "❌ 发现的问题：\n";
+                issues.forEach((issue, idx) => {
+                    output += `${idx + 1}. ${issue}\n`;
+                });
+                output += "\n";
+            } else {
+                output += "✅ 代码检查通过！代码质量良好！\n\n";
+            }
+
+            output += "💡 改进建议：\n";
+            suggestions.forEach((suggestion, idx) => {
+                output += `${idx + 1}. ${suggestion}\n`;
+            });
+
+            output += "\n🔧 修复后的代码：\n";
+            output += fixCode;
+
+            return { score: Math.max(0, score), result: output };
+        }
+
+        async function getHelp() {
+            const code = document.getElementById('codeInput').value;
+            const language = document.getElementById('language').value;
+            const resultDiv = document.getElementById('result');
+            const submitBtn = document.getElementById('submitBtn');
+            const apiKeyInput = document.getElementById('apiKey');
+            
+            submitBtn.disabled = true;
+            resultDiv.innerHTML = 'AI 正在分析你的代码...请稍候...';
+            resultDiv.className = 'loading';
+
+            const apiKey = apiKeyInput?.value?.trim();
+            
+            if (apiKey && apiKey.length > 10) {
+                resultDiv.innerHTML = `🔄 正在调用 AI 服务...\n\n检测到 API Key，正在连接远程 AI 进行分析...`;
+                
+                try {
+                    const response = await callAI(code, language, apiKey);
+                    
+                    if (response.success) {
+                        resultDiv.innerHTML = `🤖 使用 ${response.service} AI 分析结果:\n\n` + response.result;
+                        resultDiv.className = 'result-success';
+                        submitBtn.disabled = false;
+                        return;
+                    } else {
+                        resultDiv.innerHTML = `❌ AI 调用失败（服务: ${response.service}）:\n\n错误信息: ${response.error}\n\n---\n\n💡 正在切换到本地分析引擎...\n\n`;
+                    }
+                } catch (error) {
+                    resultDiv.innerHTML = `❌ AI 调用异常:\n\n${error.message}\n\n---\n\n💡 正在切换到本地分析引擎...\n\n`;
+                }
+            }
+
+            const analysis = getDefaultAnalysis(code, language);
+            resultDiv.innerHTML += analysis.result;
+            resultDiv.className = '';
+            
+            if (analysis.score >= 80) {
+                resultDiv.classList.add('result-success');
+            } else if (analysis.score >= 60) {
+                resultDiv.classList.add('result-warning');
+            } else {
+                resultDiv.classList.add('result-error');
+            }
+            
+            submitBtn.disabled = false;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('AI 编程助手已加载就绪！');
+            
+            const textarea = document.getElementById('codeInput');
+            textarea.addEventListener('input', function() {
+                const lines = this.value.split('\n');
+                this.style.height = 'auto';
+                this.style.height = Math.min(lines.length * 24 + 20, 400) + 'px';
+            });
+        });
+    </script>
+</body>
+</html>

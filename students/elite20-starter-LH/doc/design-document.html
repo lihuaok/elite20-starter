@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 编程助手 - 详细设计文档</title>
+    <style>
+        :root {
+            --primary: #1e3a5f;
+            --accent: #00d4ff;
+            --text: #1e293b;
+            --light: #f8fafc;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, #2d5a87 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            margin-bottom: 32px;
+        }
+        header h1 { font-size: 2rem; margin-bottom: 8px; }
+        header p { opacity: 0.9; }
+        .section {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .section h2 {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--accent);
+        }
+        .section h3 {
+            font-size: 1.25rem;
+            margin: 20px 0 12px;
+            color: #334155;
+        }
+        .section h4 {
+            font-size: 1.1rem;
+            margin: 16px 0 8px;
+            color: #475569;
+        }
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+        .table-container { overflow-x: auto; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+        }
+        th, td {
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+        tr:hover { background: #f8fafc; }
+        ul, ol { padding-left: 24px; margin: 12px 0; }
+        li { margin: 8px 0; }
+        .highlight {
+            background: rgba(0, 212, 255, 0.1);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+        .note {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+        }
+        .success {
+            background: #dcfce7;
+            border-left: 4px solid #10b981;
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+        }
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin: 16px 0;
+        }
+        .feature-card {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent);
+        }
+        .feature-card h4 { margin-top: 0; color: var(--primary); }
+        .architecture {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 16px 0;
+        }
+        .flow-step {
+            display: flex;
+            align-items: center;
+            margin: 12px 0;
+        }
+        .flow-step::before {
+            content: '';
+            width: 24px;
+            height: 24px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 16px;
+            flex-shrink: 0;
+        }
+        .flow-step:nth-child(1)::before { content: '1'; }
+        .flow-step:nth-child(2)::before { content: '2'; }
+        .flow-step:nth-child(3)::before { content: '3'; }
+        .flow-step:nth-child(4)::before { content: '4'; }
+        .flow-step:nth-child(5)::before { content: '5'; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI 编程助手 - 详细设计文档</h1>
+            <p>专业的代码辅导平台 - 帮助提升编程能力</p>
+        </header>
+
+        <div class="section">
+            <h2>1. 项目概述</h2>
+            <h3>1.1 项目背景</h3>
+            <p>本项目是一个基于 Web 的 AI 编程辅导平台，旨在通过 AI 技术为编程学习者提供专业的代码分析和辅导服务。</p>
+            
+            <h3>1.2 项目目标</h3>
+            <ul>
+                <li>提供专业的代码分析服务，覆盖五大辅导维度</li>
+                <li>支持多种编程语言的代码分析</li>
+                <li>集成多种 AI 服务提供商</li>
+                <li>提供良好的用户体验和响应式设计</li>
+            </ul>
+
+            <h3>1.3 用户群体</h3>
+            <ul>
+                <li>编程初学者</li>
+                <li>需要代码审查的开发者</li>
+                <li>计算机专业学生</li>
+                <li>希望提升编程技能的爱好者</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>2. 系统架构设计</h2>
+            <h3>2.1 架构概述</h3>
+            <p>本系统采用单页应用（SPA）架构，前端通过 REST API 与后端 AI 服务进行通信。</p>
+
+            <h3>2.2 架构图</h3>
+            <div class="architecture">
+                <h4>系统架构图</h4>
+                <div class="flow-step">用户界面层：HTML + CSS + JavaScript（单页应用）</div>
+                <div class="flow-step">业务逻辑层：代码分析引擎、API 调用模块、结果解析模块</div>
+                <div class="flow-step">服务集成层：多种 AI 服务提供商（硅基流动、DeepSeek、豆包等）</div>
+                <div class="flow-step">数据存储层：本地存储（API Key）、会话状态管理</div>
+            </div>
+
+            <h3>2.3 模块划分</h3>
+            <div class="feature-list">
+                <div class="feature-card">
+                    <h4>代码输入模块</h4>
+                    <p>支持多语言代码输入，提供语法高亮</p>
+                </div>
+                <div class="feature-card">
+                    <h4>AI 调用模块</h4>
+                    <p>集成多种 AI 服务，支持自动检测和手动选择</p>
+                </div>
+                <div class="feature-card">
+                    <h4>结果展示模块</h4>
+                    <p>Markdown 渲染、代码高亮、评分展示</p>
+                </div>
+                <div class="feature-card">
+                    <h4>服务管理模块</h4>
+                    <p>API Key 管理、服务切换、错误处理</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>3. 功能模块设计</h2>
+            <h3>3.1 代码分析功能</h3>
+            <p>支持五大辅导维度的代码分析：</p>
+            <ul>
+                <li><span class="highlight">代码理解</span>：对代码逻辑的解释清晰度（20%）</li>
+                <li><span class="highlight">逻辑分析</span>：分析代码问题的深度（20%）</li>
+                <li><span class="highlight">调试技巧</span>：提供具体的调试方法（20%）</li>
+                <li><span class="highlight">最佳实践</span>：推荐行业标准做法（20%）</li>
+                <li><span class="highlight">架构设计</span>：代码结构和可维护性（20%）</li>
+            </ul>
+
+            <h3>3.2 语言支持</h3>
+            <p>支持的编程语言：Python、Java、JavaScript、Kotlin、C++、C</p>
+
+            <h3>3.3 AI 服务支持</h3>
+            <div class="table-container">
+                <table>
+                    <tr><th>服务名称</th><th>API 端点</th><th>模型名称</th></tr>
+                    <tr><td>硅基流动</td><td>api.siliconflow.cn</td><td>deepseek-ai/DeepSeek-V3</td></tr>
+                    <tr><td>DeepSeek</td><td>api.deepseek.com</td><td>deepseek-chat</td></tr>
+                    <tr><td>豆包</td><td>api.doubao.com</td><td>Doubao</td></tr>
+                    <tr><td>OpenAI</td><td>api.openai.com</td><td>gpt-3.5-turbo</td></tr>
+                    <tr><td>百度千帆</td><td>aip.baidubce.com</td><td>ERNIE-Bot</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>4. UI/UX 设计规范</h2>
+            <h3>4.1 色彩系统</h3>
+            <div class="table-container">
+                <table>
+                    <tr><th>颜色类型</th><th>颜色值</th><th>用途</th></tr>
+                    <tr><td>主色</td><td>#1e3a5f</td><td>品牌主色、按钮、强调元素</td></tr>
+                    <tr><td>主色渐变</td><td>#1e3a5f → #2d5a87</td><td>背景渐变</td></tr>
+                    <tr><td>辅助色</td><td>#00d4ff</td><td>高亮、交互反馈</td></tr>
+                    <tr><td>成功色</td><td>#10b981</td><td>成功状态</td></tr>
+                    <tr><td>警告色</td><td>#f59e0b</td><td>警告状态</td></tr>
+                    <tr><td>错误色</td><td>#ef4444</td><td>错误状态</td></tr>
+                </table>
+            </div>
+
+            <h3>4.2 排版规范</h3>
+            <div class="table-container">
+                <table>
+                    <tr><th>层级</th><th>字体大小</th><th>字重</th><th>用途</th></tr>
+                    <tr><td>H1</td><td>2.5rem (40px)</td><td>700</td><td>主标题</td></tr>
+                    <tr><td>H2</td><td>1.75rem (28px)</td><td>600</td><td>副标题</td></tr>
+                    <tr><td>H3</td><td>1.125rem (18px)</td><td>600</td><td>卡片标题</td></tr>
+                    <tr><td>正文</td><td>1rem (16px)</td><td>400</td><td>主体内容</td></tr>
+                    <tr><td>代码</td><td>0.875rem (14px)</td><td>400</td><td>代码块</td></tr>
+                </table>
+            </div>
+
+            <h3>4.3 响应式设计</h3>
+            <ul>
+                <li><strong>桌面端 (>1200px)</strong>：12列网格，24px间距</li>
+                <li><strong>平板端 (768px-1200px)</strong>：8列网格，16px间距</li>
+                <li><strong>移动端 (<768px)</strong>：4列网格，12px间距</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>5. 技术栈</h2>
+            <h3>5.1 前端技术</h3>
+            <ul>
+                <li><strong>HTML5</strong>：语义化标记</li>
+                <li><strong>CSS3</strong>：Flexbox、Grid、动画</li>
+                <li><strong>JavaScript ES6+</strong>：模块化、异步处理</li>
+                <li><strong>marked.js</strong>：Markdown 渲染</li>
+            </ul>
+
+            <h3>5.2 外部依赖</h3>
+            <div class="table-container">
+                <table>
+                    <tr><th>依赖</th><th>版本</th><th>用途</th></tr>
+                    <tr><td>marked.js</td><td>^12.0.0</td><td>Markdown 解析和渲染</td></tr>
+                    <tr><td>Google Fonts</td><td>Inter</td><td>主字体</td></tr>
+                    <tr><td>Google Fonts</td><td>JetBrains Mono</td><td>代码字体</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>6. API 接口设计</h2>
+            <h3>6.1 请求格式</h3>
+            <div class="code-block">
+POST /v1/chat/completions<br>
+Content-Type: application/json<br>
+Authorization: Bearer {apiKey}<br>
+<br>
+{<br>
+  "model": "deepseek-ai/DeepSeek-V3",<br>
+  "messages": [{ "role": "user", "content": "..." }],<br>
+  "max_tokens": 2048,<br>
+  "temperature": 0.7<br>
+}
+            </div>
+
+            <h3>6.2 响应格式</h3>
+            <div class="code-block">
+{<br>
+  "choices": [<br>
+    {<br>
+      "message": {<br>
+        "role": "assistant",<br>
+        "content": "辅导报告内容..."<br>
+      }<br>
+    }<br>
+  ],<br>
+  "usage": {<br>
+    "prompt_tokens": 100,<br>
+    "completion_tokens": 500<br>
+  }<br>
+}
+            </div>
+
+            <h3>6.3 错误处理</h3>
+            <div class="table-container">
+                <table>
+                    <tr><th>错误码</th><th>错误类型</th><th>处理方式</th></tr>
+                    <tr><td>400</td><td>请求参数错误</td><td>显示参数错误提示</td></tr>
+                    <tr><td>401</td><td>认证失败</td><td>提示 API Key 无效</td></tr>
+                    <tr><td>403</td><td>权限不足</td><td>提示权限不足</td></tr>
+                    <tr><td>500</td><td>服务端错误</td><td>自动重试或降级</td></tr>
+                    <tr><td>超时</td><td>请求超时</td><td>提示超时并降级</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>7. 安全考虑</h2>
+            <h3>7.1 API Key 保护</h3>
+            <ul>
+                <li>使用 type="password" 输入框隐藏 Key</li>
+                <li>不在 URL 中传输 Key</li>
+                <li>使用 HTTPS 加密传输</li>
+                <li>本地存储使用 localStorage 加密</li>
+            </ul>
+
+            <h3>7.2 输入验证</h3>
+            <ul>
+                <li>代码长度限制（最大 10000 字符）</li>
+                <li>特殊字符过滤</li>
+                <li>API Key 格式验证</li>
+            </ul>
+
+            <h3>7.3 CORS 策略</h3>
+            <p>由于浏览器跨域限制，直接调用外部 API 可能失败。解决方案：</p>
+            <ul>
+                <li>使用 CORS 代理</li>
+                <li>部署后端服务转发请求</li>
+                <li>使用支持 CORS 的 API 服务</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>8. 性能优化</h2>
+            <h3>8.1 加载优化</h3>
+            <ul>
+                <li>使用 defer 属性延迟加载脚本</li>
+                <li>CSS 按需加载</li>
+                <li>图片懒加载</li>
+            </ul>
+
+            <h3>8.2 缓存策略</h3>
+            <ul>
+                <li>API Key 本地缓存</li>
+                <li>分析结果会话缓存</li>
+                <li>静态资源浏览器缓存</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>9. 部署方案</h2>
+            <h3>9.1 GitHub Pages 部署</h3>
+            <ol>
+                <li>在 GitHub 仓库设置中启用 Pages</li>
+                <li>选择 main 分支和 / 或 /app 目录</li>
+                <li>配置自定义域名（可选）</li>
+            </ol>
+
+            <h3>9.2 访问地址</h3>
+            <p>https://lihuaok.github.io/elite20-starter-LH/</p>
+        </div>
+
+        <div class="section">
+            <h2>10. 测试计划</h2>
+            <h3>10.1 功能测试</h3>
+            <ul>
+                <li>代码输入和提交功能</li>
+                <li>AI 服务选择和切换</li>
+                <li>分析结果展示</li>
+                <li>错误处理和降级机制</li>
+            </ul>
+
+            <h3>10.2 兼容性测试</h3>
+            <ul>
+                <li>Chrome、Firefox、Safari、Edge</li>
+                <li>移动端 Safari、Chrome</li>
+            </ul>
+
+            <h3>10.3 性能测试</h3>
+            <ul>
+                <li>页面加载时间 < 3s</li>
+                <li>API 响应时间 < 10s</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>11. 代码安全性</h2>
+            <div class="success">
+                <strong>安全原则：</strong>
+                <ul>
+                    <li>不存储用户 API Key 在服务器端</li>
+                    <li>所有数据传输使用 HTTPS</li>
+                    <li>输入数据进行严格验证</li>
+                    <li>避免 XSS 攻击（HTML 转义）</li>
+                    <li>避免 CSRF 攻击（无状态请求）</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

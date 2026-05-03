@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 编程助手 - AI 调用代码逐行注释分析</title>
+    <style>
+        :root {
+            --primary: #1e3a5f;
+            --accent: #00d4ff;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.8;
+            color: #1e293b;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, #2d5a87 100%);
+            color: white;
+            padding: 48px;
+            border-radius: 20px;
+            margin-bottom: 32px;
+        }
+        header h1 { font-size: 2rem; margin-bottom: 8px; }
+        header p { opacity: 0.9; font-size: 1.1rem; }
+        .section {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .section h2 {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 3px solid var(--accent);
+        }
+        .section h3 {
+            font-size: 1.25rem;
+            margin: 24px 0 12px;
+            color: #334155;
+        }
+        .section h4 {
+            font-size: 1.1rem;
+            margin: 16px 0 8px;
+            color: #475569;
+            background: rgba(30, 58, 95, 0.05);
+            padding: 8px 12px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+        .code-block {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 20px 24px;
+            border-radius: 12px;
+            font-family: 'Consolas', 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            margin: 16px 0;
+            border: 1px solid #1e293b;
+            position: relative;
+        }
+        .code-block .line {
+            display: flex;
+            margin: 4px 0;
+        }
+        .code-block .line-number {
+            color: #64748b;
+            margin-right: 16px;
+            min-width: 36px;
+            text-align: right;
+            user-select: none;
+        }
+        .code-block .comment { color: #64748b; font-style: italic; }
+        .code-block .keyword { color: #c678dd; }
+        .code-block .string { color: #98c379; }
+        .code-block .function { color: #61afef; }
+        .code-block .property { color: #d19a66; }
+        .code-block .variable { color: #e5c07b; }
+        .code-block .number { color: #d19a66; }
+        .explanation {
+            background: rgba(0, 212, 255, 0.08);
+            border-left: 4px solid var(--accent);
+            padding: 12px 16px;
+            margin: 8px 0 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95rem;
+        }
+        .explanation strong { color: var(--primary); }
+        .table-container { overflow-x: auto; margin: 16px 0; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+        tr:hover { background: #f8fafc; }
+        ul, ol { padding-left: 28px; margin: 12px 0; }
+        li { margin: 10px 0; }
+        .highlight {
+            background: rgba(0, 212, 255, 0.1);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-family: monospace;
+        }
+        .success {
+            background: #dcfce7;
+            border-left: 4px solid #10b981;
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+        }
+        .warning {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+        }
+        .error {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+        }
+        .flow-diagram {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 16px 0;
+            border: 1px solid #e2e8f0;
+        }
+        .flow-step {
+            display: flex;
+            align-items: center;
+            margin: 12px 0;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .flow-step::before {
+            content: '';
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-right: 16px;
+            flex-shrink: 0;
+        }
+        .flow-step:nth-child(1)::before { content: '1'; }
+        .flow-step:nth-child(2)::before { content: '2'; }
+        .flow-step:nth-child(3)::before { content: '3'; }
+        .flow-step:nth-child(4)::before { content: '4'; }
+        .flow-step:nth-child(5)::before { content: '5'; }
+        .flow-step:nth-child(6)::before { content: '6'; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI 编程助手 - AI 调用代码逐行注释分析</h1>
+            <p>详细解析：AI 服务配置、API 调用实现、响应处理与结果渲染</p>
+        </header>
+
+        <div class="section">
+            <h2>1. AI 服务配置对象 (AI_SERVICES)</h2>
+            <p>这是整个 AI 调用系统的核心配置对象，定义了支持的多个 AI 服务提供商及其调用参数。</p>
+
+            <h3>1.1 服务配置结构说明</h3>
+            <div class="code-block">
+                <div class="line"><span class="line-number">1113</span><span class="keyword">const</span> <span class="variable">AI_SERVICES</span> = {</div>
+                <div class="line"><span class="line-number">1114</span>    <span class="string">'doubao'</span>: {</div>
+                <div class="line"><span class="line-number">1115</span>        <span class="property">name</span>: <span class="string">'豆包'</span>,              <span class="comment">// 服务显示名称</span></div>
+                <div class="line"><span class="line-number">1116</span>        <span class="property">url</span>: <span class="string">'https://api.doubao.com/chat/completions'</span>,</div>
+                <div class="line"><span class="line-number">1117</span>        <span class="property">getHeaders</span>: (<span class="variable">apiKey</span>) => ({ <span class="comment">// 请求头构造函数</span></div>
+                <div class="line"><span class="line-number">1118</span>            <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span>,</div>
+                <div class="line"><span class="line-number">1119</span>            <span class="string">'Authorization'</span>: <span class="string">`Bearer ${apiKey}`</span></div>
+                <div class="line"><span class="line-number">1120</span>        }),</div>
+                <div class="line"><span class="line-number">1121</span>        <span class="property">getBody</span>: (<span class="variable">prompt</span>) => ({ <span class="comment">// 请求体构造函数</span></div>
+                <div class="line"><span class="line-number">1122</span>            <span class="property">model</span>: <span class="string">'Doubao'</span>,</div>
+                <div class="line"><span class="line-number">1123</span>            <span class="property">messages</span>: [{ <span class="property">role</span>: <span class="string">'user'</span>, <span class="property">content</span>: <span class="variable">prompt</span> }],</div>
+                <div class="line"><span class="line-number">1124</span>            <span class="property">max_tokens</span>: <span class="number">2048</span>,</div>
+                <div class="line"><span class="line-number">1125</span>            <span class="property">temperature</span>: <span class="number">0.7</span></div>
+                <div class="line"><span class="line-number">1126</span>        }),</div>
+                <div class="line"><span class="line-number">1127</span>        <span class="property">parseResponse</span>: (<span class="variable">data</span>) => <span class="variable">data</span>.<span class="property">choices</span>?.[<span class="number">0</span>]?.<span class="property">message</span>?.<span class="property">content</span> || <span class="variable">data</span>.<span class="property">result</span> || <span class="string">'未获取到响应'</span></div>
+                <div class="line"><span class="line-number">1128</span>    },</div>
+            </div>
+
+            <div class="explanation">
+                <strong>设计要点：</strong>
+                <ul>
+                    <li><code>name</code>：服务显示名称，用于 UI 展示</li>
+                    <li><code>url</code>：API 端点地址</li>
+                    <li><code>getHeaders()</code>：动态构造请求头，支持不同认证方式</li>
+                    <li><code>getBody()</code>：构造请求体，包含模型参数和消息内容</li>
+                    <li><code>parseResponse()</code>：解析响应数据，适配不同服务的返回格式</li>
+                </ul>
+            </div>
+
+            <h3>1.2 硅基流动服务配置</h3>
+            <div class="code-block">
+                <div class="line"><span class="line-number">1144</span>    <span class="string">'siliconflow'</span>: {</div>
+                <div class="line"><span class="line-number">1145</span>        <span class="property">name</span>: <span class="string">'硅基流动'</span>,</div>
+                <div class="line"><span class="line-number">1146</span>        <span class="property">url</span>: <span class="string">'https://api.siliconflow.cn/v1/chat/completions'</span>,</div>
+                <div class="line"><span class="line-number">1147</span>        <span class="property">getHeaders</span>: (<span class="variable">apiKey</span>) => ({</div>
+                <div class="line"><span class="line-number">1148</span>            <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span>,</div>
+                <div class="line"><span class="line-number">1149</span>            <span class="string">'Authorization'</span>: <span class="string">`Bearer ${apiKey}`</span></div>
+                <div class="line"><span class="line-number">1150</span>        }),</div>
+                <div class="line"><span class="line-number">1151</span>        <span class="property">getBody</span>: (<span class="variable">prompt</span>) => ({</div>
+                <div class="line"><span class="line-number">1152</span>            <span class="property">model</span>: <span class="string">'deepseek-ai/DeepSeek-V4-Flash'</span>, <span class="comment">// 硅基流动特有的模型名称</span></div>
+                <div class="line"><span class="line-number">1153</span>            <span class="property">messages</span>: [{ <span class="property">role</span>: <span class="string">'user'</span>, <span class="property">content</span>: <span class="variable">prompt</span> }],</div>
+                <div class="line"><span class="line-number">1154</span>            <span class="property">max_tokens</span>: <span class="number">4096</span>, <span class="comment">// 更大的 token 限制</span></div>
+                <div class="line"><span class="line-number">1155</span>            <span class="property">temperature</span>: <span class="number">0.7</span></div>
+                <div class="line"><span class="line-number">1156</span>        }),</div>
+                <div class="line"><span class="line-number">1157</span>        <span class="property">parseResponse</span>: (<span class="variable">data</span>) => <span class="variable">data</span>.<span class="property">choices</span>?.[<span class="number">0</span>]?.<span class="property">message</span>?.<span class="property">content</span> || <span class="variable">data</span>.<span class="property">result</span> || <span class="string">'未获取到响应'</span></div>
+                <div class="line"><span class="line-number">1158</span>    },</div>
+            </div>
+
+            <div class="explanation">
+                <strong>硅基流动配置特点：</strong>
+                <ul>
+                    <li>模型名称格式为 <code>deepseek-ai/DeepSeek-V4-Flash</code>（带用户名前缀）</li>
+                    <li><code>max_tokens</code> 设置为 4096，支持更长的响应</li>
+                    <li>使用标准的 OpenAI 兼容 API 格式</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>2. API Key 安全处理函数</h2>
+            <p>这组函数用于清理和验证用户输入的 API Key，防止安全漏洞和字符编码问题。</p>
+
+            <h3>2.1 isValidAscii() - ASCII 字符验证</h3>
+            <div class="code-block">
+                <div class="line"><span class="line-number">1194</span>        <span class="keyword">function</span> <span class="function">isValidAscii</span>(<span class="variable">str</span>) {</div>
+                <div class="line"><span class="line-number">1195</span>            <span class="keyword">for</span> (<span class="keyword">let</span> <span class="variable">i</span> = <span class="number">0</span>; <span class="variable">i</span> < <span class="variable">str</span>.<span class="property">length</span>; <span class="variable">i</span>++) {</div>
+                <div class="line"><span class="line-number">1196</span>                <span class="keyword">if</span> (<span class="variable">str</span>.<span class="property">charCodeAt</span>(<span class="variable">i</span>) > <span class="number">127</span>) {</div>
+                <div class="line"><span class="line-number">1197</span>                    <span class="keyword">return</span> <span class="keyword">false</span>;</div>
+                <div class="line"><span class="line-number">1198</span>                }</div>
+                <div class="line"><span class="line-number">1199</span>            }</div>
+                <div class="line"><span class="line-number">1200</span>            <span class="keyword">return</span> <span class="keyword">true</span>;</div>
+                <div class="line"><span class="line-number">1201</span>        }</div>
+            </div>
+
+            <div class="explanation">
+                <strong>功能说明：</strong>遍历字符串中的每个字符，检查其 ASCII 码是否超过 127。如果包含非 ASCII 字符（如中文、特殊符号等），返回 <code>false</code>。这可以防止复制粘贴时带入的隐藏字符或特殊字符导致请求失败。
+            </div>
+
+            <h3>2.2 sanitizeApiKey() - API Key 清理</h3>
+            <div class="code-block">
+                <div class="line"><span class="line-number">1203</span>        <span class="keyword">function</span> <span class="function">sanitizeApiKey</span>(<span class="variable">apiKey</span>) {</div>
+                <div class="line"><span class="line-number">1204</span>            <span class="keyword">if</span> (!<span class="variable">apiKey</span>) <span class="keyword">return</span> <span class="string">''</span>;</div>
+                <div class="line"><span class="line-number">1205</span>            <span class="keyword">let</span> <span class="variable">sanitized</span> = <span class="variable">apiKey</span>.<span class="property">trim</span>();</div>
+                <div class="line"><span class="line-number">1206</span>            <span class="variable">sanitized</span> = <span class="variable">sanitized</span>.<span class="property">replace</span>(/<span class="string">[\u0000-\u001F\u007F-\uFFFF]</span>/g, <span class="string">''</span>);</div>
+                <div class="line"><span class="line-number">1207</span>            <span class="keyword">return</span> <span class="variable">sanitized</span>;</div>
+                <div class="line"><span class="line-number">1208</span>        }</div>
+            </div>
+
+            <div class="explanation">
+                <strong>清理步骤：</strong>
+                <ol>
+                    <li>检查 API Key 是否为空，为空则返回空字符串</li>
+                    <li>使用 <code>trim()</code> 去除首尾空格</li>
+                    <li>使用正则表达式移除控制字符（\u0000-\u001F）和非 ASCII 字符（\u007F-\uFFFF）</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>3. 服务检测函数 (detectService)</h2>
+            <p>根据 API Key 的格式自动检测对应的 AI 服务提供商，也支持用户手动选择。</p>
+
+            <div class="code-block">
+                <div class="line"><span class="line-number">1210</span>        <span class="keyword">function</span> <span class="function">detectService</span>(<span class="variable">apiKey</span>) {</div>
+                <div class="line"><span class="line-number">1211</span>            <span class="keyword">const</span> <span class="variable">cleanKey</span> = <span class="function">sanitizeApiKey</span>(<span class="variable">apiKey</span>);</div>
+                <div class="line"><span class="line-number">1212</span>            <span class="variable">console</span>.<span class="property">log</span>(<span class="string">'API Key 长度:'</span>, <span class="variable">cleanKey</span>.<span class="property">length</span>, <span class="string">'前10字符:'</span>, <span class="variable">cleanKey</span>.<span class="property">substring</span>(<span class="number">0</span>, <span class="number">10</span>));</div>
+                <div class="line"><span class="line-number">1213</span></div>
+                <div class="line"><span class="line-number">1214</span>            <span class="keyword">const</span> <span class="variable">serviceSelect</span> = <span class="variable">document</span>.<span class="property">getElementById</span>(<span class="string">'serviceType'</span>);</div>
+                <div class="line"><span class="line-number">1215</span>            <span class="keyword">if</span> (<span class="variable">serviceSelect</span> && <span class="variable">serviceSelect</span>.<span class="property">value</span> !== <span class="string">'auto'</span>) {</div>
+                <div class="line"><span class="line-number">1216</span>                <span class="keyword">const</span> <span class="variable">selectedService</span> = <span class="variable">serviceSelect</span>.<span class="property">value</span>;</div>
+                <div class="line"><span class="line-number">1217</span>                <span class="variable">console</span>.<span class="property">log</span>(<span class="string">'用户手动选择服务:'</span>, <span class="variable">AI_SERVICES</span>[<span class="variable">selectedService</span>]?.<span class="property">name</span> || <span class="variable">selectedService</span>);</div>
+                <div class="line"><span class="line-number">1218</span>                <span class="keyword">return</span> <span class="variable">selectedService</span>;</div>
+                <div class="line"><span class="line-number">1219</span>            }</div>
+                <div class="line"><span class="line-number">1220</span></div>
+                <div class="line"><span class="line-number">1221</span>            <span class="keyword">if</span> (<span class="variable">cleanKey</span>.<span class="property">startsWith</span>(<span class="string">'sk-'</span>)) {</div>
+                <div class="line"><span class="line-number">1222</span>                <span class="keyword">if</span> (<span class="variable">cleanKey</span>.<span class="property">length</span> > <span class="number">50</span>) {</div>
+                <div class="line"><span class="line-number">1223</span>                    <span class="variable">console</span>.<span class="property">log</span>(<span class="string">'检测到硅基流动/DeepSeek API Key'</span>);</div>
+                <div class="line"><span class="line-number">1224</span>                    <span class="keyword">return</span> <span class="string">'siliconflow'</span>;</div>
+                <div class="line"><span class="line-number">1225</span>                }</div>
+                <div class="line"><span class="line-number">1226</span>                <span class="variable">console</span>.<span class="property">log</span>(<span class="string">'检测到 OpenAI API Key'</span>);</div>
+                <div class="line"><span class="line-number">1227</span>                <span class="keyword">return</span> <span class="string">'openai'</span>;</div>
+                <div class="line"><span class="line-number">1228</span>            }</div>
+                <div class="line"><span class="line-number">1229</span>            <span class="keyword">if</span> (<span class="variable">cleanKey</span>.<span class="property">includes</span>(<span class="string">':'</span>)) {</div>
+                <div class="line"><span class="line-number">1230</span>                <span class="variable">console</span>.<span class="property">log</span>(<span class="string">'检测到百度千帆 API Key'</span>);</div>
+                <div class="line"><span class="line-number">1231</span>                <span class="keyword">return</span> <span class="string">'qianfan'</span>;</div>
+                <div class="line"><span class="line-number">1232</span>            }</div>
+                <div class="line"><span class="line-number">1233</span>            <span class="variable">console</span>.<span class="property">log</span>(<span class="string">'检测到豆包 API Key'</span>);</div>
+                <div class="line"><span class="line-number">1234</span>            <span class="keyword">return</span> <span class="string">'doubao'</span>;</div>
+                <div class="line"><span class="line-number">1235</span>        }</div>
+            </div>
+
+            <div class="explanation">
+                <strong>服务检测逻辑：</strong>
+                <ol>
+                    <li><strong>优先检查用户手动选择</strong>：如果用户在下拉菜单中选择了特定服务，则直接返回该服务</li>
+                    <li><strong>以 sk- 开头且长度 > 50</strong>：识别为硅基流动（SiliconFlow）</li>
+                    <li><strong>以 sk- 开头且长度 ≤ 50</strong>：识别为 OpenAI</li>
+                    <li><strong>包含冒号</strong>：识别为百度千帆（格式为 api_key:secret_key）</li>
+                    <li><strong>其他情况</strong>：默认为豆包</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>4. 超时处理函数 (timeoutPromise)</h2>
+            <p>为异步操作添加超时机制，防止请求无限等待。</p>
+
+            <div class="code-block">
+                <div class="line"><span class="line-number">1237</span>        <span class="keyword">function</span> <span class="function">timeoutPromise</span>(<span class="variable">promise</span>, <span class="variable">ms</span>) {</div>
+                <div class="line"><span class="line-number">1238</span>            <span class="keyword">return</span> <span class="keyword">new</span> <span class="variable">Promise</span>((<span class="variable">resolve</span>, <span class="variable">reject</span>) => {</div>
+                <div class="line"><span class="line-number">1239</span>                <span class="keyword">const</span> <span class="variable">timer</span> = <span class="variable">setTimeout</span>(() => {</div>
+                <div class="line"><span class="line-number">1240</span>                    <span class="variable">reject</span>(<span class="keyword">new</span> <span class="variable">Error</span>(<span class="string">`请求超时（${ms/1000}秒）`</span>));</div>
+                <div class="line"><span class="line-number">1241</span>                }, <span class="variable">ms</span>);</div>
+                <div class="line"><span class="line-number">1242</span>                <span class="variable">promise</span>.<span class="property">then</span>(</div>
+                <div class="line"><span class="line-number">1243</span>                    (<span class="variable">result</span>) => {</div>
+                <div class="line"><span class="line-number">1244</span>                        <span class="variable">clearTimeout</span>(<span class="variable">timer</span>);</div>
+                <div class="line"><span class="line-number">1245</span>                        <span class="variable">resolve</span>(<span class="variable">result</span>);</div>
+                <div class="line"><span class="line-number">1246</span>                    },</div>
+                <div class="line"><span class="line-number">1247</span>                    (<span class="variable">err</span>) => {</div>
+                <div class="line"><span class="line-number">1248</span>                        <span class="variable">clearTimeout</span>(<span class="variable">timer</span>);</div>
+                <div class="line"><span class="line-number">1249</span>                        <span class="variable">reject</span>(<span class="variable">err</span>);</div>
+                <div class="line"><span class="line-number">1250</span>                    }</div>
+                <div class="line"><span class="line-number">1251</span>                );</div>
+                <div class="line"><span class="line-number">1252</span>            });</div>
+                <div class="line"><span class="line-number">1253</span>        }</div>
+            </div>
+
+            <div class="explanation">
+                <strong>设计要点：</strong>
+                <ul>
+                    <li>包装传入的 Promise，添加超时定时器</li>
+                    <li>如果在指定时间（ms）内 Promise 未完成，自动 reject 并抛出超时错误</li>
+                    <li>如果 Promise 成功完成或失败，都会清除定时器，避免内存泄漏</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>5. 核心 AI 调用函数 (callAI)</h2>
+            <p>这是整个系统的核心函数，负责构造请求、调用 AI 服务、处理响应和错误。</p>
+
+            <div class="code-block">
+                <div class="line"><span class="line-number">1255</span>        <span class="keyword">async</span> <span class="keyword">function</span> <span class="function">callAI</span>(<span class="variable">code</span>, <span class="variable">language</span>, <span class="variable">apiKey</span>) {</div>
+                <div class="line"><span class="line-number">1256</span>            <span class="keyword">const</span> <span class="variable">cleanApiKey</span> = <span class="function">sanitizeApiKey</span>(<span class="variable">apiKey</span>);</div>
+                <div class="line"><span class="line-number">1257</span>            <span class="keyword">const</span> <span class="variable">fullPrompt</span> = <span class="string">`作为一名专业的编程辅导老师，请按照以下五个维度对代码进行详细分析：</span></div>
+                <div class="line"><span class="line-number">1258</span></div>
+                <div class="line"><span class="line-number">1259</span><span class="string">【代码辅导标准】</span></div>
+                <div class="line"><span class="line-number">1260</span><span class="string">1. 代码理解（20%）：对代码逻辑的解释清晰度</span></div>
+                <div class="line"><span class="line-number">1261</span><span class="string">2. 逻辑分析（20%）：分析代码问题的深度</span></div>
+                <div class="line"><span class="line-number">1262</span><span class="string">3. 调试技巧（20%）：提供具体的调试方法</span></div>
+                <div class="line"><span class="line-number">1263</span><span class="string">4. 最佳实践（20%）：推荐行业标准做法</span></div>
+                <div class="line"><span class="line-number">1264</span><span class="string">5. 架构设计（20%）：代码结构和可维护性</span></div>
+                <div class="line"><span class="line-number">1265</span></div>
+                <div class="line"><span class="line-number">1266</span><span class="string">【要求】</span></div>
+                <div class="line"><span class="line-number">1267</span><span class="string">- 输出格式：使用 Markdown 格式</span></div>
+                <div class="line"><span class="line-number">1268</span><span class="string">- 包含总体评分（0-100分）</span></div>
+                <div class="line"><span class="line-number">1269</span><span class="string">- 列出发现的问题（错误用🚨，警告用⚠️）</span></div>
+                <div class="line"><span class="line-number">1270</span><span class="string">- 提供具体的改进建议</span></div>
+                <div class="line"><span class="line-number">1271</span><span class="string">- 给出修复后的代码示例</span></div>
+                <div class="line"><span class="line-number">1272</span></div>
+                <div class="line"><span class="line-number">1273</span><span class="string">【待分析代码】</span></div>
+                <div class="line"><span class="line-number">1274</span><span class="string">语言：${language}</span></div>
+                <div class="line"><span class="line-number">1275</span></div>
+                <div class="line"><span class="line-number">1276</span><span class="string">\`\`\`${language}</span></div>
+                <div class="line"><span class="line-number">1277</span><span class="string">${code}</span></div>
+                <div class="line"><span class="line-number">1278</span><span class="string">\`\`\`</span></div>
+                <div class="line"><span class="line-number">1279</span></div>
+                <div class="line"><span class="line-number">1280</span><span class="string">请给出详细的辅导报告。`</span>;</div>
+            </div>
+
+            <div class="explanation">
+                <strong>Prompt 设计要点：</strong>
+                <ul>
+                    <li><strong>结构化评分标准</strong>：明确五个维度各占 20%，让 AI 有清晰的评分依据</li>
+                    <li><strong>输出格式要求</strong>：指定 Markdown 格式，便于前端渲染</li>
+                    <li><strong>问题标识</strong>：要求用 🚨 标记错误，⚠️ 标记警告</li>
+                    <li><strong>代码示例</strong>：要求提供修复后的代码，帮助用户理解改进方案</li>
+                </ul>
+            </div>
+
+            <div class="code-block">
+                <div class="line"><span class="line-number">1282</span>            <span class="keyword">const</span> <span class="variable">serviceType</span> = <span class="function">detectService</span>(<span class="variable">cleanApiKey</span>);</div>
+                <div class="line"><span class="line-number">1283</span>            <span class="keyword">const</span> <span class="variable">service</span> = <span class="variable">AI_SERVICES</span>[<span class="variable">serviceType</span>];</div>
+                <div class="line"><span class="line-number">1284</span></div>
+                <div class="line"><span class="line-number">1285</span>            <span class="variable">console</span>.<span class="property">log</span>(<span class="string">`检测到服务类型: ${service.name}`</span>, <span class="string">`API Key 长度: ${cleanApiKey.length}`</span>);</div>
+                <div class="line"><span class="line-number">1286</span></div>
+                <div class="line"><span class="line-number">1287</span>            <span class="keyword">if</span> (!<span class="function">isValidAscii</span>(<span class="variable">cleanApiKey</span>)) {</div>
+                <div class="line"><span class="line-number">1288</span>                <span class="variable">console</span>.<span class="property">error</span>(<span class="string">'API Key 包含非 ASCII 字符'</span>);</div>
+                <div class="line"><span class="line-number">1289</span>                <span class="keyword">return</span> { <span class="property">success</span>: <span class="keyword">false</span>, <span class="property">error</span>: <span class="string">'API Key 包含非法字符，请检查是否有复制粘贴带来的隐藏字符'</span>, <span class="property">service</span>: <span class="variable">service</span>.<span class="property">name</span> };</div>
+                <div class="line"><span class="line-number">1290</span>            }</div>
+            </div>
+
+            <div class="explanation">
+                <strong>服务检测和验证：</strong>
+                <ol>
+                    <li>调用 <code>detectService()</code> 确定要使用的 AI 服务</li>
+                    <li>从 <code>AI_SERVICES</code> 获取服务配置</li>
+                    <li>验证 API Key 是否包含非法字符，如有则提前返回错误</li>
+                </ol>
+            </div>
+
+            <div class="code-block">
+                <div class="line"><span class="line-number">1292</span>            <span class="keyword">try</span> {</div>
+                <div class="line"><span class="line-number">1293</span>                <span class="keyword">const</span> <span class="variable">controller</span> = <span class="keyword">new</span> <span class="variable">AbortController</span>();</div>
+                <div class="line"><span class="line-number">1294</span>                <span class="keyword">const</span> <span class="variable">timeoutId</span> = <span class="variable">setTimeout</span>(() => {</div>
+                <div class="line"><span class="line-number">1295</span>                    <span class="variable">controller</span>.<span class="property">abort</span>();</div>
+                <div class="line"><span class="line-number">1296</span>                }, <span class="number">180000</span>); <span class="comment">// 3分钟超时</span></div>
+                <div class="line"><span class="line-number">1297</span></div>
+                <div class="line"><span class="line-number">1298</span>                <span class="keyword">const</span> <span class="variable">headers</span> = <span class="variable">service</span>.<span class="property">getHeaders</span>(<span class="variable">cleanApiKey</span>);</div>
+                <div class="line"><span class="line-number">1299</span>                <span class="variable">console</span>.<span class="property">log</span>(<span class="string">'请求头:'</span>, <span class="variable">JSON</span>.<span class="property">stringify</span>(<span class="variable">headers</span>));</div>
+                <div class="line"><span class="line-number">1300</span></div>
+                <div class="line"><span class="line-number">1301</span>                <span class="keyword">const</span> <span class="variable">response</span> = <span class="keyword">await</span> <span class="function">timeoutPromise</span>(<span class="variable">fetch</span>(<span class="variable">service</span>.<span class="property">url</span>, {</div>
+                <div class="line"><span class="line-number">1302</span>                    <span class="property">method</span>: <span class="string">'POST'</span>,</div>
+                <div class="line"><span class="line-number">1303</span>                    <span class="property">headers</span>: <span class="variable">headers</span>,</div>
+                <div class="line"><span class="line-number">1304</span>                    <span class="property">body</span>: <span class="variable">JSON</span>.<span class="property">stringify</span>(<span class="variable">service</span>.<span class="property">getBody</span>(<span class="variable">fullPrompt</span>, <span class="variable">cleanApiKey</span>)),</div>
+                <div class="line"><span class="line-number">1305</span>                    <span class="property">signal</span>: <span class="variable">controller</span>.<span class="property">signal</span></div>
+                <div class="line"><span class="line-number">1306</span>                }), <span class="number">180000</span>);</div>
+            </div>
+
+            <div class="explanation">
+                <strong>请求执行步骤：</strong>
+                <ol>
+                    <li><strong>创建 AbortController</strong>：用于手动取消请求</li>
+                    <li><strong>设置 3 分钟超时</strong>：超时后自动中止请求</li>
+                    <li><strong>构造请求头</strong>：使用服务配置中的 <code>getHeaders()</code> 方法</li>
+                    <li><strong>发送请求</strong>：使用 <code>timeoutPromise</code> 包装，确保超时处理</li>
+                    <li><strong>传递 signal</strong>：将 AbortController 的 signal 传递给 fetch，支持手动取消</li>
+                </ol>
+            </div>
+
+            <div class="code-block">
+                <div class="line"><span class="line-number">1307</span>                <span class="variable">clearTimeout</span>(<span class="variable">timeoutId</span>);</div>
+                <div class="line"><span class="line-number">1308</span></div>
+                <div class="line"><span class="line-number">1309</span>                <span class="keyword">if</span> (!<span class="variable">response</span>.<span class="property">ok</span>) {</div>
+                <div class="line"><span class="line-number">1310</span>                    <span class="keyword">const</span> <span class="variable">errorText</span> = <span class="keyword">await</span> <span class="variable">response</span>.<span class="property">text</span>();</div>
+                <div class="line"><span class="line-number">1311</span>                    <span class="variable">console</span>.<span class="property">error</span>(<span class="string">'API 错误详情:'</span>, <span class="variable">errorText</span>);</div>
+                <div class="line"><span class="line-number">1312</span>                    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="variable">Error</span>(<span class="string">`API 请求失败 (${response.status}): ${errorText.substring(0, 200)}`</span>);</div>
+                <div class="line"><span class="line-number">1313</span>                }</div>
+                <div class="line"><span class="line-number">1314</span></div>
+                <div class="line"><span class="line-number">1315</span>                <span class="keyword">const</span> <span class="variable">data</span> = <span class="keyword">await</span> <span class="variable">response</span>.<span class="property">json</span>();</div>
+                <div class="line"><span class="line-number">1316</span>                <span class="variable">console</span>.<span class="property">log</span>(<span class="string">'API 响应数据:'</span>, <span class="variable">JSON</span>.<span class="property">stringify</span>(<span class="variable">data</span>).<span class="property">substring</span>(<span class="number">0</span>, <span class="number">500</span>));</div>
+                <div class="line"><span class="line-number">1317</span></div>
+                <div class="line"><span class="line-number">1318</span>                <span class="keyword">const</span> <span class="variable">result</span> = <span class="variable">service</span>.<span class="property">parseResponse</span>(<span class="variable">data</span>);</div>
+                <div class="line"><span class="line-number">1319</span>                <span class="keyword">return</span> { <span class="property">success</span>: <span class="keyword">true</span>, <span class="property">result</span>: <span class="variable">result</span>, <span class="property">service</span>: <span class="variable">service</span>.<span class="property">name</span> };</div>
+            </div>
+
+            <div class="explanation">
+                <strong>响应处理步骤：</strong>
+                <ol>
+                    <li><strong>清除超时定时器</strong>：请求成功返回，不需要再等待超时</li>
+                    <li><strong>检查响应状态</strong>：如果 <code>response.ok</code> 为 false，抛出错误</li>
+                    <li><strong>解析 JSON 响应</strong>：将响应体解析为 JSON 对象</li>
+                    <li><strong>解析结果</strong>：使用服务配置中的 <code>parseResponse()</code> 提取结果</li>
+                    <li><strong>返回成功结果</strong>：包含成功标志、结果内容和服务名称</li>
+                </ol>
+            </div>
+
+            <div class="code-block">
+                <div class="line"><span class="line-number">1320</span>            } <span class="keyword">catch</span> (<span class="variable">error</span>) {</div>
+                <div class="line"><span class="line-number">1321</span>                <span class="variable">console</span>.<span class="property">error</span>(<span class="string">'AI API 调用失败:'</span>, <span class="variable">error</span>.<span class="property">message</span>);</div>
+                <div class="line"><span class="line-number">1322</span>                <span class="keyword">let</span> <span class="variable">errorMsg</span> = <span class="variable">error</span>.<span class="property">message</span>;</div>
+                <div class="line"><span class="line-number">1323</span>                <span class="keyword">if</span> (<span class="variable">error</span>.<span class="property">name</span> === <span class="string">'AbortError'</span>) {</div>
+                <div class="line"><span class="line-number">1324</span>                    <span class="variable">errorMsg</span> = <span class="string">'请求被中止（可能是超时）'</span>;</div>
+                <div class="line"><span class="line-number">1325</span>                } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="variable">error</span>.<span class="property">message</span>.<span class="property">includes</span>(<span class="string">'Failed to fetch'</span>)) {</div>
+                <div class="line"><span class="line-number">1326</span>                    <span class="variable">errorMsg</span> = <span class="string">'网络连接失败，请检查网络或 VPN 设置'</span>;</div>
+                <div class="line"><span class="line-number">1327</span>                } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="variable">error</span>.<span class="property">message</span>.<span class="property">includes</span>(<span class="string">'CORS'</span>)) {</div>
+                <div class="line"><span class="line-number">1328</span>                    <span class="variable">errorMsg</span> = <span class="string">'跨域访问被阻止，请使用 CORS 代理或后端服务'</span>;</div>
+                <div class="line"><span class="line-number">1329</span>                } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="variable">error</span>.<span class="property">message</span>.<span class="property">includes</span>(<span class="string">'non ISO-8859-1'</span>)) {</div>
+                <div class="line"><span class="line-number">1330</span>                    <span class="variable">errorMsg</span> = <span class="string">'请求头包含非法字符，请检查 API Key 是否有隐藏字符'</span>;</div>
+                <div class="line"><span class="line-number">1331</span>                }</div>
+                <div class="line"><span class="line-number">1332</span>                <span class="keyword">return</span> { <span class="property">success</span>: <span class="keyword">false</span>, <span class="property">error</span>: <span class="variable">errorMsg</span>, <span class="property">service</span>: <span class="variable">service</span>.<span class="property">name</span> };</div>
+                <div class="line"><span class="line-number">1333</span>            }</div>
+                <div class="line"><span class="line-number">1334</span>        }</div>
+            </div>
+
+            <div class="explanation">
+                <strong>错误处理策略：</strong>
+                <ul>
+                    <li><strong>AbortError</strong>：请求被中止（超时或手动取消）</li>
+                    <li><strong>Failed to fetch</strong>：网络连接失败，提示检查网络或 VPN</li>
+                    <li><strong>CORS</strong>：跨域错误，提示使用代理或后端服务</li>
+                    <li><strong>non ISO-8859-1</strong>：字符编码问题，提示检查 API Key</li>
+                    <li><strong>其他错误</strong>：返回原始错误信息</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>6. 结果处理与渲染流程</h2>
+            <p>处理 AI 返回的结果，渲染到页面并应用样式。</p>
+
+            <h3>6.1 主入口函数 (getHelp)</h3>
+            <div class="flow-diagram">
+                <strong style="display: block; margin-bottom: 16px; color: var(--primary);">结果处理流程图</strong>
+                <div class="flow-step">获取用户输入：代码内容、编程语言、API Key</div>
+                <div class="flow-step">调用 callAI() 函数发起 AI 请求</div>
+                <div class="flow-step">检查 AI 调用结果：成功 → 渲染结果；失败 → 降级到本地分析</div>
+                <div class="flow-step">使用 marked.js 解析 Markdown 格式</div>
+                <div class="flow-step">注入到 DOM，应用 CSS 样式</div>
+                <div class="flow-step">根据评分应用不同状态样式（成功/警告/错误）</div>
+            </div>
+
+            <h3>6.2 结果渲染代码</h3>
+            <div class="code-block">
+                <div class="line"><span class="line-number">1336</span>        <span class="keyword">async</span> <span class="keyword">function</span> <span class="function">getHelp</span>() {</div>
+                <div class="line"><span class="line-number">1337</span>            <span class="keyword">const</span> <span class="variable">code</span> = <span class="variable">document</span>.<span class="property">getElementById</span>(<span class="string">'codeInput'</span>).<span class="property">value</span>;</div>
+                <div class="line"><span class="line-number">1338</span>            <span class="keyword">const</span> <span class="variable">language</span> = <span class="variable">document</span>.<span class="property">getElementById</span>(<span class="string">'language'</span>).<span class="property">value</span>;</div>
+                <div class="line"><span class="line-number">1339</span>            <span class="keyword">const</span> <span class="variable">resultDiv</span> = <span class="variable">document</span>.<span class="property">getElementById</span>(<span class="string">'result'</span>);</div>
+                <div class="line"><span class="line-number">1340</span>            <span class="keyword">const</span> <span class="variable">submitBtn</span> = <span class="variable">document</span>.<span class="property">getElementById</span>(<span class="string">'submitBtn'</span>);</div>
+                <div class="line"><span class="line-number">1341</span>            <span class="keyword">const</span> <span class="variable">apiKeyInput</span> = <span class="variable">document</span>.<span class="property">getElementById</span>(<span class="string">'apiKey'</span>);</div>
+                <div class="line"><span class="line-number">1342</span></div>
+                <div class="line"><span class="line-number">1343</span>            <span class="variable">submitBtn</span>.<span class="property">disabled</span> = <span class="keyword">true</span>;</div>
+                <div class="line"><span class="line-number">1344</span>            <span class="variable">resultDiv</span>.<span class="property">innerHTML</span> = <span class="string">'AI 正在分析你的代码...请稍候...'</span>;</div>
+                <div class="line"><span class="line-number">1345</span>            <span class="variable">resultDiv</span>.<span class="property">className</span> = <span class="string">'loading'</span>;</div>
+            </div>
+
+            <div class="explanation">
+                <strong>初始化步骤：</strong>
+                <ul>
+                    <li>获取用户输入的代码、语言选择</li>
+                    <li>获取结果显示区域和提交按钮</li>
+                    <li>禁用提交按钮防止重复提交</li>
+                    <li>显示加载状态提示</li>
+                </ul>
+            </div>
+
+            <div class="code-block">
+                <div class="line"><span class="line-number">1347</span>            <span class="keyword">const</span> <span class="variable">apiKey</span> = <span class="variable">apiKeyInput</span>?.<span class="property">value</span>?.<span class="property">trim</span>();</div>
+                <div class="line"><span class="line-number">1348</span></div>
+                <div class="line"><span class="line-number">1349</span>            <span class="keyword">if</span> (<span class="variable">apiKey</span> && <span class="variable">apiKey</span>.<span class="property">length</span> > <span class="number">10</span>) {</div>
+                <div class="line"><span class="line-number">1350</span>                <span class="variable">resultDiv</span>.<span class="property">innerHTML</span> = <span class="string">`🔄 正在调用 AI 服务...`</span>;</div>
+                <div class="line"><span class="line-number">1351</span></div>
+                <div class="line"><span class="line-number">1352</span>                <span class="keyword">try</span> {</div>
+                <div class="line"><span class="line-number">1353</span>                    <span class="keyword">const</span> <span class="variable">response</span> = <span class="keyword">await</span> <span class="function">callAI</span>(<span class="variable">code</span>, <span class="variable">language</span>, <span class="variable">apiKey</span>);</div>
+                <div class="line"><span class="line-number">1354</span></div>
+                <div class="line"><span class="line-number">1355</span>                    <span class="keyword">if</span> (<span class="variable">response</span>.<span class="property">success</span>) {</div>
+                <div class="line"><span class="line-number">1356</span>                        <span class="variable">resultDiv</span>.<span class="property">innerHTML</span> = <span class="string">`🤖 使用 ${response.service} AI 分析结果:\n\n`</span> + <span class="variable">marked</span>.<span class="property">parse</span>(<span class="variable">response</span>.<span class="property">result</span>);</div>
+                <div class="line"><span class="line-number">1357</span>                        <span class="variable">resultDiv</span>.<span class="property">className</span> = <span class="string">'result-success'</span>;</div>
+                <div class="line"><span class="line-number">1358</span>                        <span class="variable">submitBtn</span>.<span class="property">disabled</span> = <span class="keyword">false</span>;</div>
+                <div class="line"><span class="line-number">1359</span>                        <span class="keyword">return</span>;</div>
+                <div class="line"><span class="line-number">1360</span>                    } <span class="keyword">else</span> {</div>
+                <div class="line"><span class="line-number">1361</span>                        <span class="variable">resultDiv</span>.<span class="property">innerHTML</span> = <span class="string">`❌ AI 调用失败（服务: ${response.service}）:\n\n错误信息: ${response.error}\n\n---\n\n💡 正在切换到本地分析引擎...\n\n`</span>;</div>
+                <div class="line"><span class="line-number">1362</span>                    }</div>
+                <div class="line"><span class="line-number">1363</span>                } <span class="keyword">catch</span> (<span class="variable">error</span>) {</div>
+                <div class="line"><span class="line-number">1364</span>                    <span class="variable">resultDiv</span>.<span class="property">innerHTML</span> = <span class="string">`❌ AI 调用异常:\n\n${error.message}\n\n---\n\n💡 正在切换到本地分析引擎...\n\n`</span>;</div>
+                <div class="line"><span class="line-number">1365</span>                }</div>
+                <div class="line"><span class="line-number">1366</span>            }</div>
+            </div>
+
+            <div class="explanation">
+                <strong>AI 调用逻辑：</strong>
+                <ol>
+                    <li>检查是否提供了有效的 API Key（长度 > 10）</li>
+                    <li>调用 <code>callAI()</code> 函数</li>
+                    <li>成功：使用 marked.js 解析 Markdown，显示结果</li>
+                    <li>失败：显示错误信息，并准备降级到本地分析</li>
+                </ol>
+            </div>
+
+            <div class="code-block">
+                <div class="line"><span class="line-number">1368</span>            <span class="keyword">const</span> <span class="variable">analysis</span> = <span class="function">getDefaultAnalysis</span>(<span class="variable">code</span>, <span class="variable">language</span>);</div>
+                <div class="line"><span class="line-number">1369</span>            <span class="variable">resultDiv</span>.<span class="property">innerHTML</span> += <span class="variable">marked</span>.<span class="property">parse</span>(<span class="variable">analysis</span>.<span class="property">result</span>);</div>
+                <div class="line"><span class="line-number">1370</span>            <span class="variable">resultDiv</span>.<span class="property">className</span> = <span class="string">''</span>;</div>
+                <div class="line"><span class="line-number">1371</span></div>
+                <div class="line"><span class="line-number">1372</span>            <span class="keyword">if</span> (<span class="variable">analysis</span>.<span class="property">score</span> >= <span class="number">80</span>) {</div>
+                <div class="line"><span class="line-number">1373</span>                <span class="variable">resultDiv</span>.<span class="property">classList</span>.<span class="property">add</span>(<span class="string">'result-success'</span>);</div>
+                <div class="line"><span class="line-number">1374</span>            } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="variable">analysis</span>.<span class="property">score</span> >= <span class="number">60</span>) {</div>
+                <div class="line"><span class="line-number">1375</span>                <span class="variable">resultDiv</span>.<span class="property">classList</span>.<span class="property">add</span>(<span class="string">'result-warning'</span>);</div>
+                <div class="line"><span class="line-number">1376</span>            } <span class="keyword">else</span> {</div>
+                <div class="line"><span class="line-number">1377</span>                <span class="variable">resultDiv</span>.<span class="property">classList</span>.<span class="property">add</span>(<span class="string">'result-error'</span>);</div>
+                <div class="line"><span class="line-number">1378</span>            }</div>
+                <div class="line"><span class="line-number">1379</span></div>
+                <div class="line"><span class="line-number">1380</span>            <span class="variable">submitBtn</span>.<span class="property">disabled</span> = <span class="keyword">false</span>;</div>
+                <div class="line"><span class="line-number">1381</span>        }</div>
+            </div>
+
+            <div class="explanation">
+                <strong>降级处理和结果展示：</strong>
+                <ol>
+                    <li>调用 <code>getDefaultAnalysis()</code> 获取本地分析结果</li>
+                    <li>使用 marked.js 解析并追加到结果区域</li>
+                    <li>根据评分应用状态样式（80+ 成功，60-79 警告，<60 错误）</li>
+                    <li>重新启用提交按钮</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>7. 本地分析引擎 (getDefaultAnalysis)</h2>
+            <p>当 AI 服务不可用时，使用基于规则的本地分析引擎提供基础代码分析能力。</p>
+
+            <div class="code-block">
+                <div class="line"><span class="line-number">1383</span>        <span class="keyword">function</span> <span class="function">getDefaultAnalysis</span>(<span class="variable">code</span>, <span class="variable">language</span>) {</div>
+                <div class="line"><span class="line-number">1384</span>            <span class="keyword">let</span> <span class="variable">score</span> = <span class="number">70</span>;</div>
+                <div class="line"><span class="line-number">1385</span>            <span class="keyword">let</span> <span class="variable">analysis</span> = <span class="string">`【代码辅导报告】\n\n`</span>;</div>
+                <div class="line"><span class="line-number">1386</span></div>
+                <div class="line"><span class="line-number">1387</span>            <span class="keyword">if</span> (<span class="variable">code</span>.<span class="property">includes</span>(<span class="string">'for('</span>) && !<span class="variable">code</span>.<span class="property">includes</span>(<span class="string">'for ('</span>)) {</div>
+                <div class="line"><span class="line-number">1388</span>                <span class="variable">analysis</span> += <span class="string">`⚠️ 语法建议：for 循环后建议加空格\n\n`</span>;</div>
+                <div class="line"><span class="line-number">1389</span>                <span class="variable">score</span> -= <span class="number">5</span>;</div>
+                <div class="line"><span class="line-number">1390</span>            }</div>
+                <div class="line"><span class="line-number">1391</span></div>
+                <div class="line"><span class="line-number">1392</span>            <span class="keyword">const</span> <span class="variable">openBrackets</span> = (<span class="variable">code</span>.<span class="property">match</span>(/<span class="string">\{</span>/g) || []).<span class="property">length</span>;</div>
+                <div class="line"><span class="line-number">1393</span>            <span class="keyword">const</span> <span class="variable">closeBrackets</span> = (<span class="variable">code</span>.<span class="property">match</span>(/<span class="string">\}</span>/g) || []).<span class="property">length</span>;</div>
+                <div class="line"><span class="line-number">1394</span>            <span class="keyword">if</span> (<span class="variable">openBrackets</span> !== <span class="variable">closeBrackets</span>) {</div>
+                <div class="line"><span class="line-number">1395</span>                <span class="variable">analysis</span> += <span class="string">`🚨 错误：大括号不匹配\n\n`</span>;</div>
+                <div class="line"><span class="line-number">1396</span>                <span class="variable">score</span> -= <span class="number">15</span>;</div>
+                <div class="line"><span class="line-number">1397</span>            }</div>
+                <div class="line"><span class="line-number">1398</span></div>
+                <div class="line"><span class="line-number">1399</span>            <span class="variable">analysis</span> += <span class="string">`总体评分：${score}/100\n\n`</span>;</div>
+                <div class="line"><span class="line-number">1400</span>            <span class="variable">analysis</span> += <span class="string">`建议：注意代码格式规范，添加适当注释`</span>;</div>
+                <div class="line"><span class="line-number">1401</span></div>
+                <div class="line"><span class="line-number">1402</span>            <span class="keyword">return</span> { <span class="property">score</span>: <span class="variable">score</span>, <span class="property">result</span>: <span class="variable">analysis</span> };</div>
+                <div class="line"><span class="line-number">1403</span>        }</div>
+            </div>
+
+            <div class="explanation">
+                <strong>本地分析引擎功能：</strong>
+                <ul>
+                    <li><strong>代码格式检查</strong>：检测 for 循环后是否有空格</li>
+                    <li><strong>括号匹配检查</strong>：检测大括号是否成对</li>
+                    <li><strong>评分系统</strong>：基于检测结果计算评分（初始 70 分）</li>
+                    <li><strong>建议生成</strong>：提供改进建议</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>8. 代码安全性</h2>
+            <div class="success">
+                <strong>安全设计要点：</strong>
+                <ul>
+                    <li><strong>API Key 保护</strong>：使用 type="password" 隐藏输入，不存储到服务器</li>
+                    <li><strong>输入验证</strong>：过滤非法字符和控制字符</li>
+                    <li><strong>HTTPS 传输</strong>：确保数据传输加密</li>
+                    <li><strong>错误处理</strong>：详细但安全的错误信息，不泄露敏感数据</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
